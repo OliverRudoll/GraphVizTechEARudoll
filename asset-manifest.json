@@ -1,0 +1,21 @@
+{
+  "files": {
+    "main.css": "https//OliverRudoll.github.io/GraphVizTechEARudoll/static/css/main.733fba7b.chunk.css",
+    "main.js": "https//OliverRudoll.github.io/GraphVizTechEARudoll/static/js/main.d6672022.chunk.js",
+    "main.js.map": "https//OliverRudoll.github.io/GraphVizTechEARudoll/static/js/main.d6672022.chunk.js.map",
+    "runtime-main.js": "https//OliverRudoll.github.io/GraphVizTechEARudoll/static/js/runtime-main.d405bde0.js",
+    "runtime-main.js.map": "https//OliverRudoll.github.io/GraphVizTechEARudoll/static/js/runtime-main.d405bde0.js.map",
+    "static/js/2.e3fb3f18.chunk.js": "https//OliverRudoll.github.io/GraphVizTechEARudoll/static/js/2.e3fb3f18.chunk.js",
+    "static/js/2.e3fb3f18.chunk.js.map": "https//OliverRudoll.github.io/GraphVizTechEARudoll/static/js/2.e3fb3f18.chunk.js.map",
+    "index.html": "https//OliverRudoll.github.io/GraphVizTechEARudoll/index.html",
+    "precache-manifest.bb0b4af513271d1c480c7cbc566f1111.js": "https//OliverRudoll.github.io/GraphVizTechEARudoll/precache-manifest.bb0b4af513271d1c480c7cbc566f1111.js",
+    "service-worker.js": "https//OliverRudoll.github.io/GraphVizTechEARudoll/service-worker.js",
+    "static/css/main.733fba7b.chunk.css.map": "https//OliverRudoll.github.io/GraphVizTechEARudoll/static/css/main.733fba7b.chunk.css.map"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.d405bde0.js",
+    "static/js/2.e3fb3f18.chunk.js",
+    "static/css/main.733fba7b.chunk.css",
+    "static/js/main.d6672022.chunk.js"
+  ]
+}
