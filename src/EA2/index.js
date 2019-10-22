@@ -1,16 +1,6 @@
 import React, { Component } from 'react';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
 
-import * as THREE  from "three";
-
-import Stats from 'three/examples/jsm/libs/stats.module.js';
-import { GUI } from 'three/examples/jsm/libs/dat.gui.module.js';
-
-import { Wireframe } from 'three/examples/jsm/lines/Wireframe.js';
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
-import { WireframeGeometry2 } from 'three/examples/jsm/lines/WireframeGeometry2.js';
-
 import './ea2.css';
 
 
