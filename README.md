@@ -1,1 +1,1 @@
-Test Repository for Graphical Visualisation Technologies on TH Brandenburg.
+Test Repository for Graphical Visualisation Technologies at TH Brandenburg.

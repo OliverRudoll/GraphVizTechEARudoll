@@ -4,7 +4,7 @@ import KeyboardEventHandler from 'react-keyboard-event-handler';
 import './ea2.css';
 
 export default class EA2 extends Component {
-
+    
     static propTypes = {}
     static defaultProps = {}
 
@@ -15,43 +15,14 @@ export default class EA2 extends Component {
         }
     }
 
+    
     componentDidMount() {
-
-        /*
-        'use strict'; 
-        const gl =  this['webGLCanvas'].getContext('webgl');
-
-        gl.enable(gl.SCISSOR_TEST);
-        
-        function drawRect(x, y, width, height, color) {
-          gl.scissor(x, y, width, height);
-          gl.clearColor(...color);
-          gl.clear(gl.COLOR_BUFFER_BIT);
-        }
-        
-        for (let i = 0; i < 100; ++i) {
-          const x = rand(0, 300);
-          const y = rand(0, 150);
-          const width = rand(0, 300 - x);
-          const height = rand(0, 150 - y);
-          drawRect(x, y, width, height, [rand(1), rand(1), rand(1), 1]);
-        }
-        
-        function rand(min, max) {
-          if (max === undefined) {
-            max = min;
-            min = 0;
-          }
-          return Math.random() * (max - min) + min;
-        }
-*/
-
-this.init();
-
-      }
+            this.init();
+    }
 
 
     shaderProgram = (gl, vs, fs) => {
+
         var prog = gl.createProgram();
         var addshader = function(type, source) {
             var s = gl.createShader((type == 'vertex') ?
@@ -103,14 +74,52 @@ this.init();
         );
         gl.useProgram(prog);
     
-        this.attributeSetFloats(gl, prog, "pos", 3, [
-            -1, 0, 0,
-            0, 1, 0,
-            0, -1, 0,
-            1, 0, 0
+        this.attributeSetFloats(gl, prog, "pos", 2, [
+            0.1, -0.1,
+            -0.1, 0.1,
+            0.1,0.1,
+            -0.1,-0.1,
+            -0.1,-0.1,
+            -0.2,-0.2,
+            -0.2,-0.1,
+            -0.2,-0.2,
+            -0.2,0.2,
+            0.2,0.2,
+            0.2,-0.2,
+            0.1,-0.1,
+            0,0,
+            0,-0.5,
+            -0.5,-0.5,
+            -0.5,0.5,
+            0.5,0.5,
+            0.5,-0.5,
+            -0.5,-0.5,
+            -0.5,-0.5,
+            1.0, -1.0,
+            -1, 1,
+            1,1,
+            -1,-1,
+            -1,-1,
+            -1.2,-1.2,
+            -1.2,-1.1,
+            -1.2,-1.2,
+            -1.2,1.2,
+            1.2,1.2,
+            1.2,-1.2,
+            1.2,-1.2,
+            1.1,-1.1,
+            1.1,-1.1,
+            0,0,
+            -1.5,-1.5,
+            -1.5,1.5,
+            1.5,1.5,
+            1.5,-1.5,
+            -1.5,-1.5,
+            -1.5,-1.5
         ]);
         
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        gl.drawArrays(gl.LINE_STRIP, 0, 41);
+
     }
     
     init = () => {
@@ -141,7 +150,7 @@ this.init();
 
                 <canvas ref={ref => this['webGLCanvas'] = ref} width ='512px' height ='512px'></canvas>
 
-                <div>Input Key detected: {this.state.eventKey}</div>
+                <div>{this.state.eventKey}</div>
                 <KeyboardEventHandler
                     handleKeys={['?']}
                     onKeyEvent={(key, e) => this.handleKeyDown(key)} />
