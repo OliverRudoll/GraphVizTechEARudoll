@@ -1,16 +1,7 @@
 import React, { Component } from 'react';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
-import styled from "styled-components";
 
 import './ea1.css';
-import styles from './ea1.module.css';
-
-const ImageContainer = styled.img`
-    left: 123px;
-    width: 512px;
-    height: 512px;
-    background: url("/images/GraphVizTechEA1.png") 0 0;
-`;
 
 export default class EA1 extends Component {
     static propTypes = {}
@@ -55,9 +46,12 @@ export default class EA1 extends Component {
                 })
         }
 
-        var string = `url("/images/GraphVizTechEA1.png") 0px ${this.state.yOffset}px`;
+        var string = `url("https://i.ibb.co/b7HgSFy/Graph-Viz-Tech-EA1.png") 0px ${this.state.yOffset}px`;
         this[refName].style.background = string.toString();
     }
+
+     //background: 'url("images/GraphVizTechEA1.png") 0 0'},} 
+     //src={process.env.PUBLIC_URL + '/images/placeholder1x1.png'} alt="circle" width="1" height="1"></img>
 
     render() {
         //TODO change clippingrect css by jscript code on key input left right
@@ -65,13 +59,15 @@ export default class EA1 extends Component {
 
         return (
             <div>
+                <div><h2>EA1</h2></div>
+
                 <img 
                 ref={ref => this[refName] = ref}
                 style= {{position: 'relative',
                 width: '512px',
                 height: '512px',
-                background: 'url("/images/GraphVizTechEA1.png") 0 0'}}
-                src={process.env.PUBLIC_URL + '/images/placeholder1x1.png'} alt="circle" width="1" height="1"></img>
+                background: 'url("https://i.ibb.co/b7HgSFy/Graph-Viz-Tech-EA1.png") 0 0'}}
+                src={'https://i.ibb.co/Yc3S8ZW/placeholder1x1.png'} alt="circle" width="1" height="1"></img>
                 
                 <div>Input Key detected: {this.state.eventKey}</div>
 

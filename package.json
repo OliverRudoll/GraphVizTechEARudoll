@@ -1,16 +1,19 @@
 {
-  "homepage": "http://OliverRudoll.github.io/GraphVizTechEARudoll",
+  "homepage": "https://oliverrudoll.github.io/GraphVizTechEARudoll/",
   "name": "GraphVizTechEARudoll",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "babel": "^6.23.0",
     "gh-pages": "^2.1.1",
+    "gl": "^4.4.0",
     "react": "^16.10.2",
     "react-dom": "^16.10.2",
     "react-keyboard-event-handler": "^1.5.1",
     "react-scripts": "3.2.0",
-    "styled-components": "^4.4.0"
+    "styled-components": "^4.4.0",
+    "three": "^0.109.0",
+    "webgl": "^0.0.7"
   },
   "scripts": {
     "predeploy": "yarn build",
