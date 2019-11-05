@@ -1,0 +1,22 @@
+.canvasBox {
+    width: 25%;
+    background-color: lightgrey;
+    font-family: arial;
+    margin-left: 30px;
+    height: 80%;
+    padding: 5px 10px 10px 10px;
+    border-radius: 10px;
+    display: inline-block;
+  }
+.sliderBox {
+  width: 20%;
+  background-color: lightgrey;
+  font-family: arial;
+  margin-left: 30px;
+  height: 80%;
+  padding: 5px 10px 10px 10px;
+  border-radius: 10px;
+  display: inline-block;
+}
+
+.rowC{display:flex; flex-direction:row;}
