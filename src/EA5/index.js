@@ -1,9 +1,7 @@
 import React, { Component } from 'react';
-import './ea4.css';
+import './ea5.css';
 
-var i = 1;                     //  set your counter to 1
-
-export default class EA4 extends Component {
+export default class EA5 extends Component {
 
     static propTypes = {}
     static defaultProps = {}
@@ -33,6 +31,12 @@ export default class EA4 extends Component {
            gl.frontFace(gl.CCW);
            gl.enable(gl.CULL_FACE);
            gl.cullFace(gl.BACK);
+           // ...
+           // ...
+           // ...
+           // ...
+           // ...
+           // ...
 
            // Compile vertex shader. 
            var vsSource = '' + 
@@ -104,20 +108,20 @@ export default class EA4 extends Component {
            gl.clear(gl.COLOR_BUFFER_BIT);
 
            // Setup rendering tris.
-           gl.vertexAttrib4f(colAttrib, Math.random(0.5), Math.random(0.5),Math.random(0.5),1);
+           gl.vertexAttrib4f(colAttrib, 0, 1, 1, 1);
            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
            gl.drawElements(gl.TRIANGLES,
                iboTris.numberOfElements, gl.UNSIGNED_SHORT, 0);
 
            // Setup rendering lines.
-           gl.vertexAttrib4f(colAttrib, Math.random(0.5),Math.random(0.5),Math.random(0.5),1);
+           gl.vertexAttrib4f(colAttrib, 0, 0, 1, 1);
            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboLines);
            gl.drawElements(gl.LINES,
                iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
 
            function createVertexData(){
-               var n = 50;
-               var m = 50;
+               var n = 10;
+               var m = 10;
                // Positions.
                vertices = new Float32Array(3 * (n+1) * (m+1));
                // Index data.
@@ -136,6 +140,10 @@ export default class EA4 extends Component {
                    for(var j=0, r=-1; j <= m; j++, r += dr){
 
                        var iVertex = i*(m+1) + j;
+
+                       //var x = r * Math.cos(t);
+                       //var y = r * Math.sin(t);
+                       //var z = 0;
 
                        var x = r;
                        var y = t;
@@ -174,21 +182,9 @@ export default class EA4 extends Component {
            } 
     }
 
-    
-
-    myLoop = () => {           
-        setTimeout(() => {   
-             this.draw();          
-           i++;                  
-           if (i < 100000) {         
-              this.myLoop();           
-           }                
-        }, 100)
-     }
-
     init = () => {
         try {
-            this.myLoop();            
+            this.draw();
         } catch (e) {
             alert("Error: " + e);
         }
@@ -200,7 +196,7 @@ export default class EA4 extends Component {
 
             <div>
                 <div>
-                    <h2>EA4</h2>
+                    <h2>EA5</h2>
                 </div>
 
                 <div className='rowC'>
