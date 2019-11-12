@@ -17,6 +17,7 @@
     "reactstrap": "^8.1.1",
     "styled-components": "^4.4.1",
     "three": "^0.109.0",
+    "twgl.js": "^4.13.1",
     "webgl": "^0.0.7"
   },
   "scripts": {

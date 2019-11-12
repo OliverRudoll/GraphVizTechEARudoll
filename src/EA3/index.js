@@ -3,7 +3,6 @@ import KeyboardEventHandler from 'react-keyboard-event-handler';
 import Slider from 'rc-slider';
 import Tooltip from 'rc-tooltip';
 import 'rc-slider/assets/index.css';
-import { Container, Row, Col } from 'reactstrap';
 import HashMap from 'hashmap';
 
 import './ea3.css';
@@ -55,7 +54,7 @@ const handle = (props) => {
 };
 
 
-export default class EA2 extends Component {
+export default class EA3 extends Component {
 
     static propTypes = {}
     static defaultProps = {}
@@ -108,15 +107,6 @@ export default class EA2 extends Component {
             throw "Could not link the shader program!";
         }
         return prog;
-    }
-
-    attributeSetFloats = (gl, prog, attr_name, rsize, arr) => {
-        gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(arr),
-            gl.STATIC_DRAW);
-        var attr = gl.getAttribLocation(prog, attr_name);
-        gl.enableVertexAttribArray(attr);
-        gl.vertexAttribPointer(attr, rsize, gl.FLOAT, false, 0, 0);
     }
 
     draw = () => {
