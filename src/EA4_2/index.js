@@ -1,9 +1,26 @@
 import React, { Component } from 'react';
-import './ea4.css';
-
+import Slider from 'rc-slider';
+import Tooltip from 'rc-tooltip';
 var i = 1;                     //  set your counter to 1
 
-export default class EA4 extends Component {
+const Handle = Slider.Handle;
+
+const handle = (props) => {
+    const { value, dragging, index, ...restProps } = props;
+    return (
+        <Tooltip
+            prefixCls="rc-slider-tooltip"
+            overlay={value}
+            visible={dragging}
+            placement="top"
+            key={index}
+        >
+            <Handle value={value} {...restProps} />
+        </Tooltip>
+    );
+};
+
+export default class EA4_2 extends Component {
 
     static propTypes = {}
     static defaultProps = {}
@@ -11,11 +28,17 @@ export default class EA4 extends Component {
     constructor(props) {
         super(props);
         this.state = { // state keys go here
+            constant: 1.0
         }
     }
 
     componentDidMount() {
         this.init();
+    }
+
+    changeConstant =  (value) => 
+    {
+        this.setState({constant: value});
     }
 
     draw = () => {
@@ -28,7 +51,7 @@ export default class EA4 extends Component {
         }
  
            // Pipeline setup.
-           gl.clearColor(.95, .95, .95, 1);
+           gl.clearColor(Math.random(0.2), Math.random(0.2), Math.random(0.2), 0.5);
            // Backface culling.
            gl.frontFace(gl.CCW);
            gl.enable(gl.CULL_FACE);
@@ -37,10 +60,11 @@ export default class EA4 extends Component {
            // Compile vertex shader. 
            var vsSource = '' + 
                'attribute vec3 pos;' + 
-               'attribute vec4 col;' + 
+               'attribute vec4 col;' +
+               'attribute float c;' + 
                'varying vec4 color;' + 
                'void main(){' + 'color = col;' + 
-               'gl_Position = vec4(pos, 1);' +
+               'gl_Position = vec4(c * pos, 1);' +
                '}';
            var vs = gl.createShader(gl.VERTEX_SHADER);
            gl.shaderSource(vs, vsSource);
@@ -103,6 +127,8 @@ export default class EA4 extends Component {
            // Clear framebuffer and render primitives.
            gl.clear(gl.COLOR_BUFFER_BIT);
 
+           var c = gl.getAttribLocation(prog, 'c');
+           gl.vertexAttrib1f(c,this.state.constant);
            // Setup rendering tris.
            gl.vertexAttrib4f(colAttrib, Math.random(0.5), Math.random(0.5),Math.random(0.5),1);
            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, iboTris);
@@ -116,30 +142,33 @@ export default class EA4 extends Component {
                iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
 
            function createVertexData(){
-               var n = 50;
-               var m = 50;
+               var n = 100;
+               var m = 100;
                // Positions.
                vertices = new Float32Array(3 * (n+1) * (m+1));
                // Index data.
                indicesLines = new Uint16Array(2 * 2 * n * m);
                indicesTris  = new Uint16Array(3 * 2 * n * m);
 
-               var dt = /*2*Math.PI*/2/n;
-               var dr = 2/m;
+               var dt = 10/n;
+               var dr = 10/m;
                // Counter for entries in index array.
                var iLines = 0;
                var iTris = 0;
 
                // Loop angle t.
-               for(var i=0, t=-1; i <= n; i++, t += dt) {
+               for(var i=0, t=-Math.PI; i <= n; i++, t += dt) {
                    // Loop radius r.
-                   for(var j=0, r=-1; j <= m; j++, r += dr){
+                   for(var j=0, r=Math.PI; j <= m; j++, r += dr){
+
+                        var u = t;
+                        var v = r;
 
                        var iVertex = i*(m+1) + j;
 
-                       var x = r;
-                       var y = t;
-                       var z = Math.pow(r,3) - 3 * r * Math.pow(t,2);
+                       var x = 2 * Math.sin(3* u)/(2 + Math.cos(v));
+                       var y = 2 * (Math.sin(u) + 2* Math.sin(2 *u))/(2 + Math.cos(v + 2 *Math.PI/3));    
+                       var z = (Math.cos(u) - 2 * Math.cos(2 * u)) * (2 + Math.cos(v)) * (2 + Math.cos(v + 2 * Math.PI/3))/4;
 
                        // Set vertex positions.
                        vertices[iVertex * 3] = x;
@@ -157,7 +186,7 @@ export default class EA4 extends Component {
                            indicesLines[iLines++] = iVertex - (m+1);                            
                            indicesLines[iLines++] = iVertex;
                        }
-
+/*
                        // Set index.
                        // Two Triangles.
                        if(j>0 && i>0){
@@ -168,7 +197,7 @@ export default class EA4 extends Component {
                            indicesTris[iTris++] = iVertex - 1;
                            indicesTris[iTris++] = iVertex - (m+1) - 1;
                            indicesTris[iTris++] = iVertex - (m+1);    
-                       }
+                       }*/
                    }
                }
            } 
@@ -200,7 +229,7 @@ export default class EA4 extends Component {
 
             <div>
                 <div>
-                    <h2>EA4</h2>
+                    <h2>EA4 2 - Tranguloid Trefoil</h2>
                 </div>
 
                 <div className='rowC'>
@@ -209,6 +238,12 @@ export default class EA4 extends Component {
                         <canvas ref={ref => this['webGLCanvas'] = ref} width='512px' height='512px'></canvas>
                     </div>
                 </div>
+
+                <div style={wrapperStyle}>
+                            Zoom :
+                                <Slider min={0.001} max={2.0} defaultValue={1.0} step={0.001} handle={handle} onChange={this.changeConstant} />
+                        </div>
+
                 <div style={{ position: 'relative', height: '30px' }}></div>
             </div>
 
