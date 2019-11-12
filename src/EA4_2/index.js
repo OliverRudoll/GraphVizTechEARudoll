@@ -28,7 +28,8 @@ export default class EA4_2 extends Component {
     constructor(props) {
         super(props);
         this.state = { // state keys go here
-            constant: 1.0
+            constant: 1.0,
+            parameter: 0.0
         }
     }
 
@@ -39,6 +40,11 @@ export default class EA4_2 extends Component {
     changeConstant =  (value) => 
     {
         this.setState({constant: value});
+    }
+
+    changeParameter =  (value) => 
+    {
+        this.setState({parameter: value});
     }
 
     draw = () => {
@@ -92,7 +98,11 @@ export default class EA4_2 extends Component {
            // Positions, Index data.
            var vertices, indicesLines, indicesTris;
            // Fill the data arrays.
-           createVertexData();
+           var containerObject = this.createVertexData(vertices, indicesLines, indicesTris);
+
+           vertices = containerObject.vertices;
+           indicesLines = containerObject.indicesLines;
+           indicesTris = containerObject.indicesTris;
 
            // Setup position vertex buffer object.
            var vboPos = gl.createBuffer();
@@ -128,6 +138,7 @@ export default class EA4_2 extends Component {
            gl.clear(gl.COLOR_BUFFER_BIT);
 
            var c = gl.getAttribLocation(prog, 'c');
+
            gl.vertexAttrib1f(c,this.state.constant);
            // Setup rendering tris.
            gl.vertexAttrib4f(colAttrib, Math.random(0.5), Math.random(0.5),Math.random(0.5),1);
@@ -141,73 +152,81 @@ export default class EA4_2 extends Component {
            gl.drawElements(gl.LINES,
                iboLines.numberOfElements, gl.UNSIGNED_SHORT, 0);
 
-           function createVertexData(){
-               var n = 100;
-               var m = 100;
-               // Positions.
-               vertices = new Float32Array(3 * (n+1) * (m+1));
-               // Index data.
-               indicesLines = new Uint16Array(2 * 2 * n * m);
-               indicesTris  = new Uint16Array(3 * 2 * n * m);
 
-               var dt = 10/n;
-               var dr = 10/m;
-               // Counter for entries in index array.
-               var iLines = 0;
-               var iTris = 0;
-
-               // Loop angle t.
-               for(var i=0, t=-Math.PI; i <= n; i++, t += dt) {
-                   // Loop radius r.
-                   for(var j=0, r=Math.PI; j <= m; j++, r += dr){
-
-                        var u = t;
-                        var v = r;
-
-                       var iVertex = i*(m+1) + j;
-
-                       var x = 2 * Math.sin(3* u)/(2 + Math.cos(v));
-                       var y = 2 * (Math.sin(u) + 2* Math.sin(2 *u))/(2 + Math.cos(v + 2 *Math.PI/3));    
-                       var z = (Math.cos(u) - 2 * Math.cos(2 * u)) * (2 + Math.cos(v)) * (2 + Math.cos(v + 2 * Math.PI/3))/4;
-
-                       // Set vertex positions.
-                       vertices[iVertex * 3] = x;
-                       vertices[iVertex * 3 + 1] = y;
-                       vertices[iVertex * 3 + 2] = z;
-
-                       // Set index.
-                       // Line on beam.
-                       if(j>0 && i>0){
-                           indicesLines[iLines++] = iVertex - 1;
-                           indicesLines[iLines++] = iVertex;
-                       }
-                       // Line on ring.
-                       if(j>0 && i>0){
-                           indicesLines[iLines++] = iVertex - (m+1);                            
-                           indicesLines[iLines++] = iVertex;
-                       }
-/*
-                       // Set index.
-                       // Two Triangles.
-                       if(j>0 && i>0){
-                           indicesTris[iTris++] = iVertex;
-                           indicesTris[iTris++] = iVertex - 1;
-                           indicesTris[iTris++] = iVertex - (m+1);
-                           //        
-                           indicesTris[iTris++] = iVertex - 1;
-                           indicesTris[iTris++] = iVertex - (m+1) - 1;
-                           indicesTris[iTris++] = iVertex - (m+1);    
-                       }*/
-                   }
-               }
-           } 
     }
 
-    
+    createVertexData = (vertices, indicesLines, indicesTris) => {
+        var n = 100;
+        var m = 100;
+        // Positions.
+        vertices = new Float32Array(3 * (n+1) * (m+1));
+        // Index data.
+        indicesLines = new Uint16Array(2 * 2 * n * m);
+        indicesTris  = new Uint16Array(3 * 2 * n * m);
+
+        var dt = 10/n;
+        var dr = 10/m;
+        // Counter for entries in index array.
+        var iLines = 0;
+        var iTris = 0;
+
+        // Loop angle t.
+        for(var i=0, t=-Math.PI; i <= n; i++, t += dt) {
+            // Loop radius r.
+            for(var j=0, r=Math.PI; j <= m; j++, r += dr){
+
+                 var u = t;
+                 var v = r;
+
+                var iVertex = i*(m+1) + j;
+
+                var x = 2 * Math.sin(3* u)/(2 + Math.cos(v*this.state.parameter));
+                var y = 2 * (Math.sin(u) + 2* Math.sin(2 *u*this.state.parameter))/(2 + Math.cos(v*this.state.parameter + 2 *Math.PI/3));    
+                var z = (Math.cos(u) - 2 * Math.cos(2 * u)) * (2 + Math.cos(v)) * (2 + Math.cos(v + 2 * Math.PI))/4;
+
+                
+
+                // Set vertex positions.
+                vertices[iVertex * 3] = x;
+                vertices[iVertex * 3 + 1] = y;
+                vertices[iVertex * 3 + 2] = z;
+
+                // Set index.
+                // Line on beam.
+                if(j>0 && i>0){
+                    indicesLines[iLines++] = iVertex - 1;
+                    indicesLines[iLines++] = iVertex;
+                }
+                // Line on ring.
+                if(j>0 && i>0){
+                    indicesLines[iLines++] = iVertex - (m+1);                            
+                    indicesLines[iLines++] = iVertex;
+                }
+
+                // Set index.
+                // Two Triangles.
+                if(j>0 && i>0){
+                    indicesTris[iTris++] = iVertex;
+                    indicesTris[iTris++] = iVertex - 1;
+                    indicesTris[iTris++] = iVertex - (m+1);
+                    //        
+                    indicesTris[iTris++] = iVertex - 1;
+                    indicesTris[iTris++] = iVertex - (m+1) - 1;
+                    indicesTris[iTris++] = iVertex - (m+1);    
+                }
+            }
+        }
+
+        return {vertices:vertices , 
+            indicesLines:indicesLines , 
+            indicesTris:indicesTris }
+    } 
 
     myLoop = () => {           
         setTimeout(() => {   
-             this.draw();          
+             this.draw();
+             this.changeParameter(this.state.parameter+0.001);
+             this.changeConstant(this.state.constant-0.01);                      
            i++;                  
            if (i < 100000) {         
               this.myLoop();           
@@ -229,7 +248,7 @@ export default class EA4_2 extends Component {
 
             <div>
                 <div>
-                    <h2>EA4 2 - Tranguloid Trefoil</h2>
+                    <h2>EA4 2 - Tranguloid Trefoil (with extra parameter)</h2>
                 </div>
 
                 <div className='rowC'>
@@ -242,6 +261,11 @@ export default class EA4_2 extends Component {
                 <div style={wrapperStyle}>
                             Zoom :
                                 <Slider min={0.001} max={2.0} defaultValue={1.0} step={0.001} handle={handle} onChange={this.changeConstant} />
+                        </div>
+
+                        <div style={wrapperStyle}>
+                            Parameter :
+                                <Slider min={0.000001} max={4.0} defaultValue={0.0} step={0.000001} handle={handle} onChange={this.changeParameter} />
                         </div>
 
                 <div style={{ position: 'relative', height: '30px' }}></div>

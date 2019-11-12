@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
+import react
 import Slider from 'rc-slider';
 import Tooltip from 'rc-tooltip';
+import Checkbox from 'react-simple-checkbox';
 var i = 1;                     //  set your counter to 1
 const Handle = Slider.Handle;
 
@@ -26,7 +28,7 @@ export default class EA4_1 extends Component {
     constructor(props) {
         super(props);
         this.state = { // state keys go here
-            constant: 1.0
+            constant: 0.0
         }
     }
 
@@ -209,7 +211,7 @@ export default class EA4_1 extends Component {
     myLoop = () => {           
         setTimeout(() => {   
              this.draw();
-             this.changeConstant(this.state.constant+0.00001);        
+             this.changeConstant(this.state.constant+0.000001);        
            i++;                  
            if (i < 100000) {         
               this.myLoop();           
@@ -243,8 +245,13 @@ export default class EA4_1 extends Component {
 
                 <div style={wrapperStyle}>
                             Zoom :
-                                <Slider min={0.00000001} max={2.0} defaultValue={1.0} step={0.00001} handle={handle} onChange={this.changeConstant} />
+                                <Slider min={0.00000001} max={2.0} defaultValue={0.0} step={0.000001} handle={handle} onChange={this.changeConstant} />
                         </div>
+
+                        <Checkbox
+            checked={this.state.checked}
+            onChange={this.handleCheckboxChange}
+          />
 
                 <div style={{ position: 'relative', height: '30px' }}></div>
             </div>
