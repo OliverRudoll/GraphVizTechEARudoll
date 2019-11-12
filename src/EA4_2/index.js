@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import Slider from 'rc-slider';
 import Tooltip from 'rc-tooltip';
+import Checkbox from 'react-simple-checkbox';
+
 var i = 1;                     //  set your counter to 1
 
 const Handle = Slider.Handle;
@@ -29,7 +31,8 @@ export default class EA4_2 extends Component {
         super(props);
         this.state = { // state keys go here
             constant: 1.0,
-            parameter: 0.0
+            parameter: 0.0,
+            checked: true
         }
     }
 
@@ -37,14 +40,35 @@ export default class EA4_2 extends Component {
         this.init();
     }
 
-    changeConstant =  (value) => 
-    {
-        this.setState({constant: value});
+    handleCheckboxChange = (value) => {
+        this.setState({ checked: value });
+
+        if(value)
+        {
+            this.init();
+        }
+        else 
+        {
+            this.draw();
+        }
+    }
+
+    changeConstant = (value) => {
+        this.setState({ constant: value });
+        if(!this.state.checked)
+        {
+            this.draw();
+        }
     }
 
     changeParameter =  (value) => 
     {
         this.setState({parameter: value});
+
+        if(!this.state.checked)
+        {
+            this.draw();
+        }
     }
 
     draw = () => {
@@ -222,17 +246,23 @@ export default class EA4_2 extends Component {
             indicesTris:indicesTris }
     } 
 
-    myLoop = () => {           
-        setTimeout(() => {   
-             this.draw();
-             this.changeParameter(this.state.parameter+0.001);
-             this.changeConstant(this.state.constant-0.01);                      
-           i++;                  
-           if (i < 100000) {         
-              this.myLoop();           
-           }                
+     myLoop = () => {
+
+        setTimeout(() => {
+            this.draw();
+            this.changeParameter(this.state.parameter + 0.001);
+            this.changeConstant(this.state.constant - 0.01);
+            i++;
+
+            if (this.state.checked) {
+                if (i < 100000) {
+                    this.myLoop();
+                }
+            } else {
+                i = 0;
+            }
         }, 100)
-     }
+    }
 
     init = () => {
         try {
@@ -267,6 +297,17 @@ export default class EA4_2 extends Component {
                             Parameter :
                                 <Slider min={0.000001} max={4.0} defaultValue={0.0} step={0.000001} handle={handle} onChange={this.changeParameter} />
                         </div>
+
+                        <div style={wrapperStyle}>
+                    Animation on?
+                        <Checkbox
+                        id='Animation'
+                        color='#884A88'
+                        size='2'
+                        checked={this.state.checked}
+                        onChange={this.handleCheckboxChange}
+                    />
+                </div>
 
                 <div style={{ position: 'relative', height: '30px' }}></div>
             </div>
