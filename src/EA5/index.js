@@ -151,7 +151,6 @@ handleKeyDown = (key) => {
     if (key === 's') {
 
         console.log('s pressed ! ')
-
         var value = this.state.rotationX - 0.01;
         var value = this.state.cameraEyeX - 0.1;
 
@@ -167,7 +166,6 @@ handleKeyDown = (key) => {
     if (key === 'a') {
 
         console.log('a pressed ! ')
-
         var value = this.state.rotationY - 0.01;
         var value = this.state.cameraEyeY - 0.1;
 
@@ -184,7 +182,6 @@ handleKeyDown = (key) => {
 
 
         console.log('d pressed ! ')
-
         var value = this.state.rotationY + 0.01;
         var value = this.state.cameraEyeY + 0.1;
 
@@ -199,7 +196,6 @@ handleKeyDown = (key) => {
     else
     if (key === 'q') {
         console.log('q pressed ! ')
-
         var value = this.state.rotationZ - 0.1;
         var value = this.state.cameraEyeZ - 0.1;
 
@@ -214,7 +210,6 @@ handleKeyDown = (key) => {
     else
     if (key === 'e') {
         console.log('e pressed ! ')
-
         var value = this.state.rotationZ + 0.1;
         var value = this.state.cameraEyeZ + 0.1;
 
@@ -524,8 +519,7 @@ handleKeyDown = (key) => {
 
         
         camera.eye = [this.state.cameraEyeX, this.state.cameraEyeY, this.state.cameraEyeZ];
-        //camera.center = [this.state.rotationX, this.state.rotationY, this.state.rotationZ];
-        //camera.up = [this.state.rotationX, this.state.rotationY, this.state.rotationZ];
+
         camera.lrtb = this.state.zoom;
 
         // Clear framebuffer and depth-/z-buffer.
