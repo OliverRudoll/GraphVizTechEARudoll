@@ -12,6 +12,8 @@ function App() {
 
     <div>
 
+<EA5></EA5>
+
 <div className='ea4_row'>
   <div className='ea4_1_box'>
   <EA4_1></EA4_1>
@@ -20,12 +22,9 @@ function App() {
   <EA4_2></EA4_2>
   </div>
 </div>
-
       <EA3></EA3>
       <EA2></EA2>
       <EA1></EA1> 
-      
-      {/*<EA5></EA5>*/}
     </div>
   );
 }
