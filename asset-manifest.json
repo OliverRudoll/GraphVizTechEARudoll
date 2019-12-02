@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/GraphVizTechEARudoll/static/css/main.db90b99a.chunk.css",
-    "main.js": "/GraphVizTechEARudoll/static/js/main.8f913ccd.chunk.js",
-    "main.js.map": "/GraphVizTechEARudoll/static/js/main.8f913ccd.chunk.js.map",
+    "main.js": "/GraphVizTechEARudoll/static/js/main.a27961ff.chunk.js",
+    "main.js.map": "/GraphVizTechEARudoll/static/js/main.a27961ff.chunk.js.map",
     "runtime-main.js": "/GraphVizTechEARudoll/static/js/runtime-main.61368249.js",
     "runtime-main.js.map": "/GraphVizTechEARudoll/static/js/runtime-main.61368249.js.map",
     "static/css/2.96479aa2.chunk.css": "/GraphVizTechEARudoll/static/css/2.96479aa2.chunk.css",
-    "static/js/2.9c8ce101.chunk.js": "/GraphVizTechEARudoll/static/js/2.9c8ce101.chunk.js",
-    "static/js/2.9c8ce101.chunk.js.map": "/GraphVizTechEARudoll/static/js/2.9c8ce101.chunk.js.map",
+    "static/js/2.b6162dc0.chunk.js": "/GraphVizTechEARudoll/static/js/2.b6162dc0.chunk.js",
+    "static/js/2.b6162dc0.chunk.js.map": "/GraphVizTechEARudoll/static/js/2.b6162dc0.chunk.js.map",
     "index.html": "/GraphVizTechEARudoll/index.html",
-    "precache-manifest.4cc94c59ee6aef0cd9a4987e1d2bd429.js": "/GraphVizTechEARudoll/precache-manifest.4cc94c59ee6aef0cd9a4987e1d2bd429.js",
+    "precache-manifest.0cff311b3ba477e9a4c16a84fcde562a.js": "/GraphVizTechEARudoll/precache-manifest.0cff311b3ba477e9a4c16a84fcde562a.js",
     "service-worker.js": "/GraphVizTechEARudoll/service-worker.js",
     "static/css/2.96479aa2.chunk.css.map": "/GraphVizTechEARudoll/static/css/2.96479aa2.chunk.css.map",
     "static/css/main.db90b99a.chunk.css.map": "/GraphVizTechEARudoll/static/css/main.db90b99a.chunk.css.map"
@@ -17,8 +17,8 @@
   "entrypoints": [
     "static/js/runtime-main.61368249.js",
     "static/css/2.96479aa2.chunk.css",
-    "static/js/2.9c8ce101.chunk.js",
+    "static/js/2.b6162dc0.chunk.js",
     "static/css/main.db90b99a.chunk.css",
-    "static/js/main.8f913ccd.chunk.js"
+    "static/js/main.a27961ff.chunk.js"
   ]
 }
