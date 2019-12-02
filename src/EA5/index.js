@@ -12,6 +12,8 @@ const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const Range = createSliderWithTooltip(Slider.Range);
 const Handle = Slider.Handle;
 
+var deltaRotate = Math.PI / 36;
+
 const handle = (props) => {
     const { value, dragging, index, ...restProps } = props;
     return (
@@ -68,13 +70,13 @@ var camera = {
     // Point to look at.
     center: [0, 0, 0],
     // Roll and pitch of the camera.
-    up: [0, 1, 0],
+    up: [1, 0, 0],
     // Opening angle given in radian.
     // radian = degree*2*PI/360.
     fovy: 60.0 * Math.PI / 180,
     // Camera near plane dimensions:
     // value for left right top bottom in projection.
-    lrtb: 2.0,
+    lrtb: 4.0,
     // View matrix.
     vMatrix: glmatrix.mat4.create(),
     // Projection matrix.
@@ -85,7 +87,7 @@ var camera = {
     // given in radian.
     zAngle: 0,
     // Distance in XZ-Plane from center when orbiting.
-    distance: 4,
+    distance: 8,
 };
 
 export default class EA5 extends Component {
@@ -102,6 +104,9 @@ export default class EA5 extends Component {
             rotationX: 0,
             rotationY: 0,
             rotationZ: 0,
+            cameraEyeX: 0,
+            cameraEyeY: 1,
+            cameraEyeZ: 4,
             cameraCenterX: 0,
             cameraCenterY: 0,
             cameraCenterZ: 0,
@@ -128,53 +133,66 @@ handleKeyDown = (key) => {
     console.log(key + "is down");
 
     if (key === 'w') {
+
         console.log('w pressed ! ')
 
         var value = this.state.rotationX + 0.01;
+        var value = this.state.cameraEyeX + 0.1;
 
             this.setState
             (
                 {
-                    rotationX: value
+                    rotationX: value,
+                    cameraEyeX: value
                 }
             )
     }
     else 
     if (key === 's') {
+
         console.log('s pressed ! ')
 
         var value = this.state.rotationX - 0.01;
+        var value = this.state.cameraEyeX - 0.1;
 
             this.setState
             (
                 {
-                    rotationX: value
+                    rotationX: value,
+                    cameraEyeX: value
                 }
             )
     }
     else
     if (key === 'a') {
+
         console.log('a pressed ! ')
 
         var value = this.state.rotationY - 0.01;
+        var value = this.state.cameraEyeY - 0.1;
 
             this.setState
             (
                 {
-                    rotationY: value
+                    rotationY: value,
+                    cameraEyeY: value
                 }
             )
     }    
     else
     if (key === 'd') {
+
+
         console.log('d pressed ! ')
 
         var value = this.state.rotationY + 0.01;
+        var value = this.state.cameraEyeY + 0.1;
 
             this.setState
             (
                 {
-                    rotationY: value
+                    rotationY: value,
+                    cameraEyeY: value
                 }
             )
     }
@@ -183,11 +201,13 @@ handleKeyDown = (key) => {
         console.log('q pressed ! ')
 
         var value = this.state.rotationZ - 0.1;
+        var value = this.state.cameraEyeZ - 0.1;
 
             this.setState
             (
                 {
-                    rotationZ: value
+                    rotationZ: value,
+                    cameraEyeZ: value
                 }
             )
     }
@@ -196,19 +216,21 @@ handleKeyDown = (key) => {
         console.log('e pressed ! ')
 
         var value = this.state.rotationZ + 0.1;
+        var value = this.state.cameraEyeZ + 0.1;
 
             this.setState
             (
                 {
-                    rotationZ: value
+                    rotationZ: value,
+                    cameraEyeZ: value
                 }
             )
     }
     else
-    if (key === 'i') {
+    if (key === 'o') {
         console.log('i pressed ! ')
 
-        var value = this.state.zoom + 0.01;
+        var value = this.state.zoom + 0.1;
 
             this.setState
             (
@@ -218,10 +240,10 @@ handleKeyDown = (key) => {
             )
     }
     else
-    if (key === 'o') {
+    if (key === 'i') {
         console.log('o pressed ! ')
 
-        var value = this.state.zoom - 0.01;
+        var value = this.state.zoom - 0.1;
 
             this.setState
             (
@@ -256,16 +278,17 @@ handleKeyDown = (key) => {
 
                     <div className='sliderBoxEA5'>
                     <div style={wrapperStyle}>
-                            Rotate Camera with W,A,S,D around X and Y and with Q,E around Z. Zoom with I,O
+                            Move Camera with W,A,S,D on X and Y axis and with Q,E around Z. Zoom with I,O.
+                            The Look At Center is 0,0,0
                         </div>
                         <div style={wrapperStyle}>
-                            camera X Value: <p>{this.state.rotationX}</p>
+                            rotationX: { this.state.rotationX} , cameraEyeX: { this.state.cameraEyeX}
                         </div>
                         <div style={wrapperStyle}>
-                            camera Y Value: <p>{this.state.rotationY}</p>
+                            rotationY: {this.state.rotationY} , cameraEyeY: { this.state.cameraEyeY}
                         </div>
                         <div style={wrapperStyle}>
-                            camera Z Value: <p>{this.state.rotationZ}</p>
+                            rotationZ: {this.state.rotationZ}, cameraEyeZ: { this.state.cameraEyeZ}
                         </div>
                         <div style={wrapperStyle}>
                             camera Zoom: <p>{this.state.zoom}</p>
@@ -475,7 +498,7 @@ handleKeyDown = (key) => {
             switch (c) {
                 case ('O'):
                     camera.projectionType = "ortho";
-                    camera.lrtb = 2;
+                    camera.lrtb = 4;
                     break;
             }
 
@@ -484,26 +507,39 @@ handleKeyDown = (key) => {
         };
     }
 
+    calculateCameraOrbit = () => {
+        // Calculate x,z position/eye of camera orbiting the center.
+        var x = 0;
+        var z = 2;
+        camera.eye[x] = camera.center[x];
+        camera.eye[z] = camera.center[z];
+        camera.eye[x] += camera.distance * Math.sin(camera.zAngle);
+        camera.eye[z] += camera.distance * Math.cos(camera.zAngle);
+    }
+
     /**
      * Run the rendering pipeline.
      */
     renderWegGL = () => {
 
-        //camera.eye = [this.state.rotationX, this.state.rotationY, this.state.rotationZ];
+        
+        camera.eye = [this.state.cameraEyeX, this.state.cameraEyeY, this.state.cameraEyeZ];
         //camera.center = [this.state.rotationX, this.state.rotationY, this.state.rotationZ];
         //camera.up = [this.state.rotationX, this.state.rotationY, this.state.rotationZ];
         camera.lrtb = this.state.zoom;
-
 
         // Clear framebuffer and depth-/z-buffer.
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         this.setProjection();
 
-        glmatrix.mat4.identity(camera.vMatrix);
-        glmatrix.mat4.rotate(camera.vMatrix, camera.vMatrix, Math.PI * this.state.rotationX,[1, 0, 0]);
-        glmatrix.mat4.rotate(camera.vMatrix, camera.vMatrix, Math.PI * this.state.rotationY,[0, 1, 0]);
-        glmatrix.mat4.rotate(camera.vMatrix, camera.vMatrix, Math.PI * this.state.rotationZ,[0, 0, 1]);
+        //glmatrix.mat4.identity(camera.vMatrix);
+        //glmatrix.mat4.rotate(camera.vMatrix, camera.vMatrix, Math.PI * this.state.rotationX,[1, 0, 0]);
+        //glmatrix.mat4.rotate(camera.vMatrix, camera.vMatrix, Math.PI * this.state.rotationY,[0, 1, 0]);
+        //glmatrix.mat4.rotate(camera.vMatrix, camera.vMatrix, Math.PI * this.state.rotationZ,[0, 0, 1]);
+
+        //this.calculateCameraOrbit();
+        glmatrix.mat4.lookAt(camera.vMatrix, camera.eye, camera.center, camera.up);
 
         // Loop over models.
         for (var i = 0; i < models.length; i++) {
