@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
-
+import Menu from '../Menu.js';
 import './ea1.css';
 
 export default class EA1 extends Component {
@@ -54,6 +54,7 @@ export default class EA1 extends Component {
      //src={process.env.PUBLIC_URL + '/images/placeholder1x1.png'} alt="circle" width="1" height="1"></img>
 
     render() {
+
         //TODO change clippingrect css by jscript code on key input left right
         let refName = 'clippingrect';
 
