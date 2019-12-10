@@ -15,6 +15,11 @@ const Handle = Slider.Handle;
 
 var i = 1;
 
+        // fill-style
+        var fs = "fillwireframe";
+        var wf = "wireframe";
+        var fill = 'fill';
+
 const handle = (props) => {
     const { value, dragging, index, ...restProps } = props;
     return (
@@ -121,10 +126,15 @@ export default class EA6 extends Component {
             interactiveSphere3: null,
             interactiveSphere4: null,
             interactiveTorus: null,
+            interactiveSphere1Translate: null,
+            interactiveSphere2Translate: null,
+            interactiveSphere3Translate: null,
+            interactiveSphere4Translate: null,
             deltaTime: 0.05,
             isLoop: false,
             radius: 0.2,
-            commandNote: ''
+            commandNote: '',
+            drawOrbit: false
         }
     }
 
@@ -309,6 +319,11 @@ export default class EA6 extends Component {
             
         }
 
+        if (key === 'p') {
+            var toggleDrawOrbit = !this.state.drawOrbit;
+            this.setState({drawOrbit: toggleDrawOrbit});            
+        }
+
         this.renderWegGL();
     }
 
@@ -329,7 +344,7 @@ export default class EA6 extends Component {
                     </div>
 
                     <KeyboardEventHandler
-                        handleKeys={['w', 'a', 's', 'd', 'q', 'e', 'i', 'o', '1', '2', '3','k','l']}
+                        handleKeys={['w', 'a', 's', 'd', 'q', 'e', 'i', 'o', '1', '2', '3','k','l','p']}
                         onKeyEvent={(key, e) => this.handleKeyDown(key)} />
 
                     <div className='sliderBoxEA5'>
@@ -337,6 +352,7 @@ export default class EA6 extends Component {
                             <h2>Note:</h2>
                             <p>The spheres will start on by one with a little delay.</p>
                             <h2>Controls:</h2>
+                            <p>Use P to toggle draw the Orbit</p>
                             <p>Start the Animated Loop with L or skip keyframe by keyframe with K. (Note: K will stop the loop.)</p>
                             <p>Move Camera with W,A,S,D on X and Y axis and with Q,E around Z. Zoom with I,O.</p>
                             <p>The Look At Center is 0,0,0</p>
@@ -356,6 +372,14 @@ export default class EA6 extends Component {
                         <div style={wrapperStyle}>
                             function angle : <p>{this.state.angle}</p>
                         </div>
+                        <div style={wrapperStyle}>
+                            <p>postiton sphere1:  {this.state.interactiveSphere1Translate === null ? 'null' : (this.state.interactiveSphere1Translate[0] + ', ' +  this.state.interactiveSphere1Translate[1] + ', ' +  this.state.interactiveSphere1Translate[2])}</p>
+                            <p>postiton sphere2:  {this.state.interactiveSphere2Translate === null ? 'null' : (this.state.interactiveSphere2Translate[0] + ', ' +   this.state.interactiveSphere2Translate[1] + ', ' +  this.state.interactiveSphere2Translate[2])}</p>
+                            <p>postiton sphere3:  {this.state.interactiveSphere3Translate === null ? 'null' : (this.state.interactiveSphere3Translate[0] + ', ' +   this.state.interactiveSphere3Translate[1] + ', ' +  this.state.interactiveSphere3Translate[2])}</p>
+                            <p>postiton sphere4:  {this.state.interactiveSphere4Translate === null ? 'null' : (this.state.interactiveSphere4Translate[0] + ', ' +   this.state.interactiveSphere4Translate[1] + ', ' +  this.state.interactiveSphere4Translate[2])}</p>
+                        </div>
+
+
                         <div style={wrapperStyle}>
                             last Commands:  {this.state.commandNote}
                         </div>
@@ -420,14 +444,14 @@ export default class EA6 extends Component {
         this.state.interactiveSphere1.translate[1] + xOffset,
         this.state.interactiveSphere1.translate[2]]
 
-        if(this.state.angle > 6.499)
+        if(this.state.angle > (6.499))
         {
         this.state.interactiveSphere2.translate = [this.state.interactiveSphere2.translate[0] - yOffset,
-        this.state.interactiveSphere2.translate[1] - xOffset,
+        this.state.interactiveSphere2.translate[1] - xOffset ,
         this.state.interactiveSphere2.translate[2]]
         }
 
-        if(this.state.angle > 3.1)
+        if(this.state.angle > (3.1))
         {
 
         this.state.interactiveSphere3.translate = [this.state.interactiveSphere3.translate[0],
@@ -435,13 +459,26 @@ export default class EA6 extends Component {
         this.state.interactiveSphere3.translate[2]+xOffset]
     }
 
-    if(this.state.angle > 9.14)
+    if(this.state.angle > (9.14))
     {
 
         this.state.interactiveSphere4.translate = [this.state.interactiveSphere4.translate[0]+yOffset,
         this.state.interactiveSphere4.translate[1],
         this.state.interactiveSphere4.translate[2]-xOffset]
 
+    }
+
+    this.setState({interactiveSphere1Translate: this.state.interactiveSphere1.translate});
+    this.setState({interactiveSphere2Translate: this.state.interactiveSphere2.translate});
+    this.setState({interactiveSphere3Translate: this.state.interactiveSphere3.translate});
+    this.setState({interactiveSphere4Translate: this.state.interactiveSphere4.translate});
+
+    if(this.state.angle % 8 && this.state.drawOrbit)
+    {
+        this.createModel('sphere', sphere, wf, this.state.interactiveSphere1.translate, [0, 0, 0],[.1, .1, .1]);
+        this.createModel('sphere', sphere, wf, this.state.interactiveSphere2.translate, [0, 0, 0],[.1, .1, .1]);
+        this.createModel('sphere', sphere, wf, this.state.interactiveSphere3.translate, [0, 0, 0],[.1, .1, .1]);
+        this.createModel('sphere', sphere, wf, this.state.interactiveSphere4.translate, [0, 0, 0],[.1, .1, .1]);
     }
     
     }
@@ -524,23 +561,19 @@ export default class EA6 extends Component {
     }
 
     initModels = () => {
-        // fill-style
-        var fs = "fillwireframe";
-        var wf = "wireframe";
-        var fill = 'fill';
 
         this.createModel('torus', torus, fill, [0, 0, 0], [1.535, 0, 0], [4, 4, 4]);
         this.createModel('plane', plane, wf, [0, -.8, 0], [0, 0, 0],
             [.3, .3, .3]);
 
-        this.createModel('sphere', sphere, fill, [0.0, 0.0, 0.0], [0, 0, 0],
-            [.5, .5, .5]);
-        this.createModel('sphere', sphere, fill, [0, 0, 0], [0, 0, 0],
-            [.5, .5, .5]);
-        this.createModel('sphere', sphere, fill, [0, 0, 0], [0, 0, 0],
-            [.5, .5, .5]);
-        this.createModel('sphere', sphere, fill, [0, 0, 0], [0, 0, 0],
-            [.5, .5, .5]);
+        this.createModel('sphere', sphere, fill, [.2, -.2, 0], [0, 0, 0],
+        [.15, .15, .15]);
+        this.createModel('sphere', sphere, fill, [-.2, .2, 0], [0, 0, 0],
+        [.15, .15, .15]);
+        this.createModel('sphere', sphere, fill, [-.2, -.2, 0], [0, 0, 0],
+        [.15, .15, .15]);
+        this.createModel('sphere', sphere, fill, [.2, .2, 0], [0, 0, 0],
+        [.15, .15, .15]);
 
         // Select one model that can be manipulated interactively by user.
         this.setState({ interactiveTorus: models[0] });
