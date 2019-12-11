@@ -4,6 +4,11 @@ export default props => (
   <>
     <p>Einsendeaufgaben{" "}</p>
     <p> 
+       <button value={8} onClick={props.clickBtn}>
+      EA 7
+    </button>{" "}
+    </p>
+    <p> 
        <button value={7} onClick={props.clickBtn}>
       EA 6
     </button>{" "}
