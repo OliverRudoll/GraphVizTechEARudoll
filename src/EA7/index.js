@@ -47,25 +47,27 @@ var prog;
 // Array of model objects.
 var models = [];
 
+var zoomStep = 1;
+
 var camera = {
     // Initial position of the camera.
-    eye: [0.7, 0.6, 1.2],
+    eye: [0, -5, 0],
     // Point to look at.
     center: [0, 0, 0],
     // Roll and pitch of the camera.
     up: [0, 1, 0],
     // Opening angle given in radian.
     // radian = degree*2*PI/360.
-    fovy: 60.0 * Math.PI / 180,
+    fovy: 140.0 * Math.PI / 180,
     // Camera near plane dimensions:
     // value for left right top bottom in projection.
-    lrtb: 4.0,
+    lrtb: 100.0,
     // View matrix.
     vMatrix: glmatrix.mat4.create(),
     // Projection matrix.
     pMatrix: glmatrix.mat4.create(),
     // Projection types: ortho, perspective, frustum.
-    projectionType: "ortho",
+    projectionType: "perspective",
     // Angle to Z-Axis for camera when orbiting the center
     // given in radian.
     zAngle: 0,
@@ -83,14 +85,14 @@ export default class EA7 extends Component {
         super(props);
         this.state = { // state keys go here
             eventKey: " ",
-            zoom: 3.6,
+            zoom: 120,
             xMin: -3.0, xMax: 3.0, yMin: -3.0, yMax: 3.0,
             rotationX: 0,
             rotationY: 0,
             rotationZ: 0,
-            cameraEyeX: 0.7,
-            cameraEyeY: 0.6,
-            cameraEyeZ: 1.2,
+            cameraEyeX: 0,
+            cameraEyeY: -5,
+            cameraEyeZ: 0,
             cameraCenterX: 0,
             cameraCenterY: 0,
             cameraCenterZ: 0,
@@ -182,7 +184,7 @@ export default class EA7 extends Component {
 
             }
             else
-                if (key === 'a') {
+                if (key === 'q') {
 
                     //var value = this.state.rotationY - 0.01;
                     var value = this.state.cameraEyeY - 0.1;
@@ -197,7 +199,7 @@ export default class EA7 extends Component {
 
                 }
                 else
-                    if (key === 'd') {
+                    if (key === 'e') {
 
                         //var value = this.state.rotationY + 0.01;
                         var value = this.state.cameraEyeY + 0.1;
@@ -212,7 +214,7 @@ export default class EA7 extends Component {
 
                     }
                     else
-                        if (key === 'q') {
+                        if (key === 'a') {
 
                             var value = this.state.rotationZ - 0.1;
                             var value = this.state.cameraEyeZ - 0.1;
@@ -227,7 +229,7 @@ export default class EA7 extends Component {
 
                         }
                         else
-                            if (key === 'e') {
+                            if (key === 'd') {
 
                                 var value = this.state.rotationZ + 0.1;
                                 var value = this.state.cameraEyeZ + 0.1;
@@ -243,8 +245,7 @@ export default class EA7 extends Component {
                             }
                             else
                                 if (key === 'o') {
-
-                                    var value = this.state.zoom + 0.1;
+                                    var value = this.state.zoom + zoomStep;
 
                                     this.setState
                                         (
@@ -252,12 +253,11 @@ export default class EA7 extends Component {
                                                 zoom: value
                                             }
                                         )
-
                                 }
                                 else
                                     if (key === 'i') {
 
-                                        var value = this.state.zoom - 0.1;
+                                        var value = this.state.zoom - zoomStep;
 
                                         this.setState
                                             (
@@ -265,24 +265,26 @@ export default class EA7 extends Component {
                                                     zoom: value
                                                 }
                                             )
-
                                     }
         if (key === '1') {
-
-            if (this.state.interactiveTorus !== null) {
-                this.state.interactiveTorus.rotate[0] += this.state.deltaTime;
-                console.log(this.state.interactiveTorus.rotate[0]);
-            }
+            zoomStep = 0.1;
+            camera.up = [0, 1, 0];
+            this.setState({zoom: 6});
+            camera.projectionType = 'ortho';
         }
         if (key === '2') {
-            if (this.state.interactiveTorus !== null) {
-                this.state.interactiveTorus.rotate[1] += this.state.deltaTime;
-            }
+            zoomStep = 0.1;
+            camera.up = [0, 1, 0];
+            this.setState({zoom: 6});
+            camera.projectionType = 'frustum';
         }
         if (key === '3') {
-            if (this.state.interactiveTorus !== null) {
-                this.state.interactiveTorus.rotate[2] += this.state.deltaTime;
-            }
+            zoomStep = 0.1;
+            camera.lrtb = 11;
+            camera.fovy = 120.0 * Math.PI / 180;
+            camera.up = [0, 1, 0];
+            this.setState({zoom: 120});
+            camera.projectionType = 'perspective';
         }
         if (key === 'k') {
             this.setState({isLoop: false});
@@ -328,7 +330,7 @@ export default class EA7 extends Component {
                     <div className='sliderBoxEA5'>
                         <div style={wrapperStyle}>
                             <h2>Note:</h2>
-                            <p>The spheres will start on by one with a little delay.</p>
+                            <p>Switch with 1, 2, 3 between ortho, frustum or perspective camera</p>
                             <h2>Controls:</h2>
                             <p>Use P to toggle draw the Orbit</p>
                             <p>Start the Animated Loop with L or skip keyframe by keyframe with K. (Note: K will stop the loop.)</p>
@@ -559,26 +561,25 @@ if (this.state.interactiveSphere1 !== null &&
 
         this.createModel('torus', torus, fill, [0, 0, 0], [1.535, 0, 0], [4, 4, 4]);
         this.createModel('plane', plane, fs, [0, -.8, 0], [0, 0, 0],
-            [.3, .3, .3]);
+            [2, 2, 2]);
 
-            /*
+            
         this.createModel('sphere', sphere, fill, [.2, -.2, 0], [0, 0, 0],
-        [.15, .15, .15]);
+        [1.5, 1.5, 1.5]);
         this.createModel('sphere', sphere, fill, [-.2, .2, 0], [0, 0, 0],
-        [.15, .15, .15]);
+        [1.5, 1.5, 1.5]);
         this.createModel('sphere', sphere, fill, [-.2, -.2, 0], [0, 0, 0],
-        [.15, .15, .15]);
+        [1.5, 1.5, 1.5]);
         this.createModel('sphere', sphere, fill, [.2, .2, 0], [0, 0, 0],
-        [.15, .15, .15]);
-*/
+        [1.5, 1.5, 1.5]);
 
         // Select one model that can be manipulated interactively by user.
-        //this.setState({ interactiveTorus: models[0] });
+        this.setState({ interactiveTorus: models[0] });
         this.setState({ interactivePlane: models[1] });
-        //this.setState({ interactiveSphere1: models[2] });
-        //this.setState({ interactiveSphere2: models[3] });
-        //this.setState({ interactiveSphere3: models[4] });
-        //this.setState({ interactiveSphere4: models[5] });
+        this.setState({ interactiveSphere1: models[2] });
+        this.setState({ interactiveSphere2: models[3] });
+        this.setState({ interactiveSphere3: models[4] });
+        this.setState({ interactiveSphere4: models[5] });
     }
 
     /**
@@ -675,7 +676,16 @@ if (this.state.interactiveSphere1 !== null &&
 
         camera.eye = [this.state.cameraEyeY, this.state.cameraEyeX, this.state.cameraEyeZ];
 
-        camera.lrtb = this.state.zoom;
+         if(camera.projectionType==='frustum'){
+            camera.lrtb = this.state.zoom;
+         } else if (camera.projectionType==='perspective'){
+            camera.lrtb = this.state.zoom;
+            camera.fovy = this.state.zoom * Math.PI / 180;
+        }
+        else {
+            camera.lrtb = this.state.zoom;
+        }
+        
 
         // Clear framebuffer and depth-/z-buffer.
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -724,6 +734,13 @@ if (this.state.interactiveSphere1 !== null &&
             case ("ortho"):
                 var v = camera.lrtb;
                 glmatrix.mat4.ortho(camera.pMatrix, -v, v, -v, v, -20, 20);
+                break;
+            case("frustum"):
+                var v = camera.lrtb;
+                glmatrix.mat4.frustum(camera.pMatrix, -v/2, v/2, -v/2, v/2, 1, 10);
+                break;
+            case("perspective"):
+                glmatrix.mat4.perspective(camera.pMatrix, camera.fovy, camera.aspect, 1, 10);
                 break;
         }
         // Set projection uniform.
