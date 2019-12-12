@@ -293,7 +293,6 @@ export default class EA8 extends Component {
                             <h2>Note:</h2>
                             <p>Switch with 1, 2, 3 between ortho, frustum or perspective camera</p>
                             <h2>Controls:</h2>
-                            <p>Use P to toggle draw the Orbit</p>
                             <p>Start the Animated Loop with L or skip keyframe by keyframe with K. (Note: K will stop the loop.)</p>
                             <p>Move Camera with W,A,S,D on X and Y axis and with Q,E around Z. Zoom with I,O.</p>
                             <p>The Look At Center is 0,0,0</p>
@@ -700,13 +699,6 @@ export default class EA8 extends Component {
             this.setState({ interactiveSphere2Translate: this.state.interactiveSphere2.translate });
             this.setState({ interactiveSphere3Translate: this.state.interactiveSphere3.translate });
             this.setState({ interactiveSphere4Translate: this.state.interactiveSphere4.translate });
-
-            if (this.state.angle % 8 && this.state.drawOrbit) {
-                this.createModel('sphere', sphere, wf, this.state.interactiveSphere1.translate, [0, 0, 0], [.1, .1, .1]);
-                this.createModel('sphere', sphere, wf, this.state.interactiveSphere2.translate, [0, 0, 0], [.1, .1, .1]);
-                this.createModel('sphere', sphere, wf, this.state.interactiveSphere3.translate, [0, 0, 0], [.1, .1, .1]);
-                this.createModel('sphere', sphere, wf, this.state.interactiveSphere4.translate, [0, 0, 0], [.1, .1, .1]);
-            }
         }
 
     }
