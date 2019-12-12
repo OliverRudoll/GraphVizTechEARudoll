@@ -560,18 +560,13 @@ if (this.state.interactiveSphere1 !== null &&
     initModels = () => {
 
         this.createModel('torus', torus, fill, [0, 0, 0], [1.535, 0, 0], [4, 4, 4]);
-        this.createModel('plane', plane, fs, [0, -.8, 0], [0, 0, 0],
-            [2, 2, 2]);
+        this.createModel('plane', plane, fs, [0, -.8, 0], [0, 0, 0],[2, 2, 2]);
 
             
-        this.createModel('sphere', sphere, fill, [.2, -.2, 0], [0, 0, 0],
-        [1.5, 1.5, 1.5]);
-        this.createModel('sphere', sphere, fill, [-.2, .2, 0], [0, 0, 0],
-        [1.5, 1.5, 1.5]);
-        this.createModel('sphere', sphere, fill, [-.2, -.2, 0], [0, 0, 0],
-        [1.5, 1.5, 1.5]);
-        this.createModel('sphere', sphere, fill, [.2, .2, 0], [0, 0, 0],
-        [1.5, 1.5, 1.5]);
+        this.createModel('sphere', sphere, fill, [.2, -.2, 0], [0, 0, 0],[1.5, 1.5, 1.5]);
+        this.createModel('sphere', sphere, fill, [-.2, .2, 0], [0, 0, 0],[1.5, 1.5, 1.5]);
+        this.createModel('sphere', sphere, fill, [-.2, -.2, 0], [0, 0, 0],[1.5, 1.5, 1.5]);
+        this.createModel('sphere', sphere, fill, [.2, .2, 0], [0, 0, 0],[1.5, 1.5, 1.5]);
 
         // Select one model that can be manipulated interactively by user.
         this.setState({ interactiveTorus: models[0] });

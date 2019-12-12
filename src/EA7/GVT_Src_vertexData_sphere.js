@@ -28,9 +28,9 @@ export function createVertexData() {
 
 			var iVertex = i * (m + 1) + j;
 
-			var x = r * Math.sin(v) * Math.cos(u);
-			var y = r * Math.sin(v) * Math.sin(u);
-			var z = r * Math.cos(v);
+			var x = r * Math.random() * Math.sin(v) * Math.cos(u);
+			var y = r * Math.random() * Math.sin(v) * Math.sin(u);
+			var z = r * Math.random() * Math.cos(v);
 
 			// Set vertex positions.
 			vertices[iVertex * 3] = x;
