@@ -16,6 +16,15 @@ module.exports = {
         },
     module: {
         rules: [
+          {
+            test: /\.csv$/,
+            loader: 'csv-loader',
+            options: {
+              dynamicTyping: true,
+              header: true,
+              skipEmptyLines: true
+            }
+          },
             {
                 test: /\.(jpg|jpeg|png|svg|gif|ico)$/,
                 exclude: /node_modules/,

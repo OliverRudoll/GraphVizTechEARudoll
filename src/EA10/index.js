@@ -8,19 +8,16 @@ import Slider from 'rc-slider';
 import Tooltip from 'rc-tooltip';
 import 'rc-slider/assets/index.css';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
+import Papa from 'papaparse';
 
-import vertexShader from './vertexShaderTextured.glsl';
-import fragmentShader from './fragmentShaderTextured.glsl';
+import Dropzone from 'react-dropzone'
 
-import vertexShader1 from './vertexShaderPhongProceduralTex.glsl';
-import fragmentShader1 from './fragmentShaderPhongProceduralTex.glsl';
 
-import myTestTexture from '../../public/ea9/textures/x.png';
-import myGrassTexture from '../../public/ea9/textures/grasstex.jpg';
-import myRockTexture from '../../public/ea9/textures/rocktex.jpg';
+import habermanCSVDataSet from './data/haberman.csv';
 
-const createSliderWithTooltip = Slider.createSliderWithTooltip;
-const Range = createSliderWithTooltip(Slider.Range);
+import vertexShader from './vertexShader.glsl';
+import fragmentShader from './fragmentShader.glsl';
+
 const Handle = Slider.Handle;
 
 var usedVertexShader = null;
@@ -123,6 +120,7 @@ export default class EA10 extends Component {
             cameraUpY: 0,
             cameraUpZ: 0,
             angle: 0,
+            interactiveSphere0: null,
             interactiveSphere1: null,
             interactiveSphere2: null,
             interactiveSphere3: null,
@@ -145,8 +143,8 @@ export default class EA10 extends Component {
 
     componentDidMount() {
 
-        usedVertexShader = vertexShader1;
-        usedFragmentShader = fragmentShader1;
+        usedVertexShader = vertexShader;
+        usedFragmentShader = fragmentShader;
 
         this.init();
     }
@@ -186,9 +184,6 @@ export default class EA10 extends Component {
         if (key === 'w') {
 
             camera.eye[1] += cameraMoveStep;
-
-
-
         }
         else
             if (key === 's') {
@@ -315,7 +310,7 @@ export default class EA10 extends Component {
                     </div>
 
                     <KeyboardEventHandler
-                        handleKeys={['w', 'a', 's', 'd', 'q', 'e', 'i', 'o', '1', '2', '3','4','5', 'k', 'l', 'p']}
+                        handleKeys={['w', 'a', 's', 'd', 'q', 'e', 'i', 'o', '1', '2', '3', '4', '5', 'k', 'l', 'p']}
                         onKeyEvent={(key, e) => this.handleKeyDown(key)} />
 
                     <div className='sliderBoxEA5'>
@@ -323,7 +318,7 @@ export default class EA10 extends Component {
                             <h2>Note:</h2>
                             <h3>Switch with 4, 5 between image texture and procedural texture</h3>
                             <p>Switch with 1, 2, 3 between ortho, frustum or perspective camera</p>
-                            
+
                             <h2>Controls:</h2>
                             <p>Start the Animated Loop with L or skip keyframe by keyframe with K. (Note: K will stop the loop.)</p>
                             <p>Move Camera with W,A,S,D on X and Y axis and with Q,E around Z. Zoom with I,O.</p>
@@ -336,25 +331,118 @@ export default class EA10 extends Component {
                             function angle : <p>{this.state.angle}</p>
                         </div>
 
-                        <div style={wrapperStyle}>
-                            <a href='https://a-gilles.com/wear_rm.php/'>Texture 1 Reference</a>
-                        </div>
 
-                        <div style={wrapperStyle}>
-                            <a href='https://i.pinimg.com/originals/c7/ef/80/c7ef8094f5014db6de1e6c3bf6c3d0ed.jpg'>Texture 2 Reference</a>
-                        </div>
-
-
-                        <div><img src={myTestTexture} /></div>
-                        <div><img src={myGrassTexture} /></div>
-                        <div><img src={myRockTexture} /></div>
+                        <Dropzone onDrop={acceptedFiles => this.onDrop(acceptedFiles)} width='512px' height='100px'>
+                            {({ getRootProps, getInputProps }) => (
+                                <section>
+                                    <div {...getRootProps()}>
+                                        <input {...getInputProps()} />
+                                        <p>Drag 'n' drop some files here, or click to select files</p>
+                                    </div>
+                                </section>
+                            )}
+                        </Dropzone>
                     </div>
+
+
+
                 </div>
                 <div style={{ position: 'relative', height: '30px' }}></div>
             </div>
         );
     }
 
+    onDrop = (acceptedFiles) => {
+        acceptedFiles.forEach((file) => {
+
+            const reader = new FileReader()
+
+            reader.onabort = () => console.log('file reading was aborted')
+            reader.onerror = () => console.log('file reading has failed')
+            reader.onload = () => {
+
+                console.log('file reading was succesful');
+                // Do whatever you want with the file contents
+                reader.onload = (e) => {
+                    this.parseCSV(e.target.result);
+                };
+
+                reader.readAsText(file);
+            }
+            reader.readAsArrayBuffer(file)
+        })
+    };
+
+
+    parseCSV = (textCSV) => {
+        //console.log(textCSV);
+        var results = Papa.parse(textCSV, { delimiter: ',', dynamicTyping: true, skipEmptyLines: true });
+
+        console.log(results.data);
+        console.log(results);
+
+        var textJSON = JSON.stringify(results.data);
+        console.log(textJSON);
+        var dataFromJSON = JSON.parse(textJSON);
+
+        var stats = this.calcStats(results.data);
+        this.dataLoadedCallback(results.data, stats);
+    }
+
+    /*
+     Get the minimum and maximum values for the first 3 ™data columns.
+     @return: object with field array of objects {min, max, range, mean} for each field
+     and separate arrays with {min, max, range, mean} with field as index
+     and value for maxRange
+*/
+    calcStats = (data) => {
+        if (!data) {
+            console.log("Data no valid.");
+            return undefined;
+        }
+        var stats = {};
+        stats.field = [];
+        stats.min = [];
+        stats.max = [];
+        stats.range = [];
+        stats.mean = [];
+
+        var min, max, mean, i;
+        // Assumes constant number of fields in data.
+        var nbFields = data[0].length;
+        for (i = 0; i < nbFields; i++) {
+            min = max = undefined;
+            mean = 0;
+            for (var d = 0; d < data.length; d++) {
+                mean += data[d][i];
+                if (max === undefined || (data[d][i] > max)) {
+                    max = data[d][i];
+                }
+                if (min === undefined || (data[d][i] < min)) {
+                    min = data[d][i];
+                }
+            }
+            mean /= data.length;
+            stats.field[i] = { min: min, max: max, range: max - min, mean: mean };
+            stats.min[i] = min;
+            stats.max[i] = max;
+            stats.range[i] = max - min;
+            stats.mean[i] = mean;
+        }
+
+        // Calculate maximum data range of all fields,
+        // restricted to the first 3 fields for 3D data plus extra fields.
+        stats.maxRange = 0;
+        //for (i = 0; i < nbFields; i++) {
+        for (i = 0; i < 3; i++) {
+            var range = Math.abs(stats.field[i].range);
+            if (range > stats.maxRange) {
+                stats.maxRange = range;
+            }
+        }
+
+        return stats;
+    }
 
     /*
     *
@@ -374,7 +462,7 @@ export default class EA10 extends Component {
             this.initModels();
             this.initPipline();
 
-            this.setState({ isLoop: true });
+            this.setState({ isLoop: false });
             //this.renderWegGL();
             this.myLoop();
 
@@ -403,7 +491,7 @@ export default class EA10 extends Component {
      * be in render .
      */
     initPipline = () => {
-        gl.clearColor(.1, .1, .1, 1);
+        gl.clearColor(.9, .9, .9, 1);
 
         // Backface culling.
         gl.frontFace(gl.CCW);
@@ -567,42 +655,12 @@ export default class EA10 extends Component {
     initModels = () => {
 
         models = [];
-
-        // Create some default material.
-        var mDefault = this.createPhongMaterial();
-
-        var mRed = this.createPhongMaterial({ kd: [1., 0., 0.] });
-        var mGreen = this.createPhongMaterial({ kd: [0., 1., 0.] });
+        var fs = "fillwireframe";
         var mBlue = this.createPhongMaterial({ kd: [0., 0., 1.] });
-        var mWhite = this.createPhongMaterial({ ka: [1., 1., 1.], kd: [.5, .5, .5], ks: [0., 0., 0.] });
+        this.createModel(sphere, fs, [1, 1, 1, 1], [0, 0, 0], [0, 0, 0],
+            [2.5, 2.5, 2.5], mBlue);
 
-        this.createModel('plane', plane, fill, [1, 1, 1, 1], [0, -3.8, 0], [0, 0, 0, 0], [2, 2, 2, 2], mDefault, 'grasstex.jpg');
-        this.createModel('torus', torus, fill, [1, 1, 1, 1], [0, 0, 0], [1.535, 0, 0, 0], [4, 4, 4, 4], mRed, 'rocktex.jpg');
-
-        /*
-                this.createModel('sphere', sphere, fill, [1, 1, 1, 1], [.2, -.2, 0], [0, 0, 0,0],[.1, .1, .1, .1], mGreen,'x.png');
-                this.createModel('sphere', sphere, fill, [1, 1, 1, 1], [-.2, .2, 0], [0, 0, 0,0],[.1, .1, .1, .1], mBlue,'x.png');
-                this.createModel('sphere', sphere, fill, [1, 1, 1, 1], [-.2, -.2, 0], [0, 0, 0,0],[.1, .1, .1, .1], mWhite,'x.png');
-                this.createModel('sphere', sphere, fill, [1, 1, 1, 1], [.2, .2, 0], [0, 0, 0,0],[.1, .1, .1, .1], mBlue,'x.png');
-        
-                //light1 position marker
-                this.createModel('sphere', sphere, wf, [1, 0, 0, 1], lightPosition1, [0, 0, 0,0],[.5, .5, .5, .5], mDefault,'x.png');
-        
-                //light1 position marker
-                this.createModel('sphere', sphere, wf, [1, 0, 0, 1], lightPosition2, [0, 0, 0,0],[.5, .5, .5, .5], mDefault,'x.png');*/
-
-        // Select one model that can be manipulated interactively by user.
-        this.setState({ interactivePlane: models[0] });
-
-
-        this.setState({ interactiveTorus: models[1] });
-        /*
-                this.setState({ interactiveSphere1: models[2] });
-                this.setState({ interactiveSphere2: models[3] });
-                this.setState({ interactiveSphere3: models[4] });
-                this.setState({ interactiveSphere4: models[5] });
-                this.setState({ lightPosition1Marker: models[6] });
-                this.setState({ lightPosition2Marker: models[7] });*/
+        this.setState({ interactiveSphere0: models[0] });
     }
 
     /**
@@ -612,9 +670,8 @@ export default class EA10 extends Component {
      * @parameter fillstyle: wireframe, fill, fillwireframe.
      */
 
-    createModel = (geometryname, geometry, fillstyle, color, translate, rotate, scale, material, textureFileReference) => {
+    createModel = (geometry, fillstyle, color, translate, rotate, scale, material, textureFileReference) => {
         var model = {};
-        model.name = geometryname;
         model.fillstyle = fillstyle;
         model.color = color;
         this.initDataAndBuffers(model, geometry);
@@ -674,14 +731,16 @@ export default class EA10 extends Component {
         prog.normalAttrib = gl.getAttribLocation(prog, 'aNormal');
         gl.enableVertexAttribArray(prog.normalAttrib);
 
-        // Setup texture coordinate vertex buffer object.
-        model.vboTextureCoord = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, model.vboTextureCoord);
-        gl.bufferData(gl.ARRAY_BUFFER, model.textureCoord, gl.STATIC_DRAW);
-        // Bind buffer to attribute variable.
-        prog.textureCoordAttrib = gl
-            .getAttribLocation(prog, 'aTextureCoord');
-        gl.enableVertexAttribArray(prog.textureCoordAttrib);
+        if (model.texture) {
+            // Setup texture coordinate vertex buffer object.
+            model.vboTextureCoord = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, model.vboTextureCoord);
+            gl.bufferData(gl.ARRAY_BUFFER, model.textureCoord, gl.STATIC_DRAW);
+            // Bind buffer to attribute variable.
+            prog.textureCoordAttrib = gl
+                .getAttribLocation(prog, 'aTextureCoord');
+            gl.enableVertexAttribArray(prog.textureCoordAttrib);
+        }
 
         // Setup lines index buffer object.
         model.iboLines = gl.createBuffer();
@@ -840,7 +899,7 @@ export default class EA10 extends Component {
         // Loop over models.
         for (var i = 0; i < models.length; i++) {
 
-            if (!models[i].texture.loaded) {
+            if (models[i].texture && !models[i].texture.loaded) {
                 continue;
             }
             // Update modelview for model.
@@ -928,16 +987,21 @@ export default class EA10 extends Component {
         gl.bindBuffer(gl.ARRAY_BUFFER, model.vboNormal);
         gl.vertexAttribPointer(prog.normalAttrib, 3, gl.FLOAT, false, 0, 0);
 
-        // Setup texture VBO.
-        gl.bindBuffer(gl.ARRAY_BUFFER, model.vboTextureCoord);
-        gl.vertexAttribPointer(prog.textureCoordAttrib, 2, gl.FLOAT, false,
-            0, 0);
+        if (model.texture) {
+            // Setup texture VBO.
+            gl.bindBuffer(gl.ARRAY_BUFFER, model.vboTextureCoord);
+            gl.vertexAttribPointer(prog.textureCoordAttrib, 2, gl.FLOAT, false,
+                0, 0);
+        }
 
         // Setup rendering tris.
         var fill = (model.fillstyle.search(/fill/) != -1);
         if (fill) {
             gl.enableVertexAttribArray(prog.normalAttrib);
-            gl.enableVertexAttribArray(prog.textureCoordAttrib);
+
+            if (model.texture) {
+                gl.enableVertexAttribArray(prog.textureCoordAttrib);
+            }
 
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboTris);
             gl.drawElements(gl.TRIANGLES, model.iboTris.numberOfElements,
@@ -949,12 +1013,20 @@ export default class EA10 extends Component {
         if (wireframe) {
             gl.uniform4fv(prog.colorUniform, [0., 0., 0., 1.]);
             gl.disableVertexAttribArray(prog.normalAttrib);
-            gl.disableVertexAttribArray(prog.textureCoordAttrib);
+
+            if (model.texture) {
+                gl.disableVertexAttribArray(prog.textureCoordAttrib);
+            }
 
             gl.vertexAttrib3f(prog.normalAttrib, 0, 0, 0);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboLines);
             gl.drawElements(gl.LINES, model.iboLines.numberOfElements,
                 gl.UNSIGNED_SHORT, 0);
         }
+    }
+
+
+    dataLoadedCallback = (data, stats) => {
+
     }
 }
