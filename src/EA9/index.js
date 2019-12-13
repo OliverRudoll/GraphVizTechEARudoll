@@ -321,8 +321,9 @@ export default class EA9 extends Component {
                     <div className='sliderBoxEA5'>
                         <div style={wrapperStyle}>
                             <h2>Note:</h2>
+                            <h3>Switch with 4, 5 between image texture and procedural texture</h3>
                             <p>Switch with 1, 2, 3 between ortho, frustum or perspective camera</p>
-                            <p>Switch with 4, 5 between image texture and procedural texture</p>
+                            
                             <h2>Controls:</h2>
                             <p>Start the Animated Loop with L or skip keyframe by keyframe with K. (Note: K will stop the loop.)</p>
                             <p>Move Camera with W,A,S,D on X and Y axis and with Q,E around Z. Zoom with I,O.</p>
@@ -333,12 +334,6 @@ export default class EA9 extends Component {
                         </div>
                         <div style={wrapperStyle}>
                             function angle : <p>{this.state.angle}</p>
-                        </div>
-                        <div style={wrapperStyle}>
-                            <p>postiton sphere1:  {this.state.interactiveSphere1Translate === null ? 'null' : (this.state.interactiveSphere1Translate[0] + ', ' + this.state.interactiveSphere1Translate[1] + ', ' + this.state.interactiveSphere1Translate[2])}</p>
-                            <p>postiton sphere2:  {this.state.interactiveSphere2Translate === null ? 'null' : (this.state.interactiveSphere2Translate[0] + ', ' + this.state.interactiveSphere2Translate[1] + ', ' + this.state.interactiveSphere2Translate[2])}</p>
-                            <p>postiton sphere3:  {this.state.interactiveSphere3Translate === null ? 'null' : (this.state.interactiveSphere3Translate[0] + ', ' + this.state.interactiveSphere3Translate[1] + ', ' + this.state.interactiveSphere3Translate[2])}</p>
-                            <p>postiton sphere4:  {this.state.interactiveSphere4Translate === null ? 'null' : (this.state.interactiveSphere4Translate[0] + ', ' + this.state.interactiveSphere4Translate[1] + ', ' + this.state.interactiveSphere4Translate[2])}</p>
                         </div>
 
                         <div style={wrapperStyle}>
