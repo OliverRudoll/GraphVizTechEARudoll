@@ -9,8 +9,11 @@ import Tooltip from 'rc-tooltip';
 import 'rc-slider/assets/index.css';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
 
-import vertexShaderText from './vertexShaderTextured.glsl';
-import fragmentShaderText from './fragmentShaderTextured.glsl';
+import vertexShader from './vertexShaderTextured.glsl';
+import fragmentShader from './fragmentShaderTextured.glsl';
+
+import vertexShader1 from './vertexShaderPhongProceduralTex.glsl';
+import fragmentShader1 from './fragmentShaderPhongProceduralTex.glsl';
 
 import myTestTexture from '../../public/ea9/textures/x.png';
 import myGrassTexture from '../../public/ea9/textures/grasstex.jpg';
@@ -20,8 +23,11 @@ const createSliderWithTooltip = Slider.createSliderWithTooltip;
 const Range = createSliderWithTooltip(Slider.Range);
 const Handle = Slider.Handle;
 
-var lightPosition1 = [0,5,0];
-var lightPosition2 = [1,3,0];
+var usedVertexShader = null;
+var usedFragmentShader = null;
+
+var lightPosition1 = [0, 5, 0];
+var lightPosition2 = [1, 3, 0];
 
 var illumination = {
     ambientLight: [.5, .5, .5],
@@ -138,6 +144,10 @@ export default class EA9 extends Component {
     }
 
     componentDidMount() {
+
+        usedVertexShader = vertexShader1;
+        usedFragmentShader = fragmentShader1;
+
         this.init();
     }
 
@@ -153,8 +163,8 @@ export default class EA9 extends Component {
     myLoop = () => {
 
         setTimeout(() => {
-            if(this.state.isLoop){
-            this.animateModels();
+            if (this.state.isLoop) {
+                this.animateModels();
             }
             this.renderWegGL();
 
@@ -175,15 +185,15 @@ export default class EA9 extends Component {
 
         if (key === 'w') {
 
-            camera.eye[1]+= cameraMoveStep;
-            
+            camera.eye[1] += cameraMoveStep;
+
 
 
         }
         else
             if (key === 's') {
-                camera.eye[1]-= cameraMoveStep;
-            
+                camera.eye[1] -= cameraMoveStep;
+
             }
             else
                 if (key === 'q') {
@@ -202,7 +212,7 @@ export default class EA9 extends Component {
 
                             camera.zAngle -= cameraMoveStep;
 
-                            
+
                         }
                         else
                             if (key === 'd') {
@@ -253,6 +263,20 @@ export default class EA9 extends Component {
             this.setState({ zoom: 120 });
             camera.projectionType = 'perspective';
         }
+        if (key === '4') {
+
+            usedFragmentShader = fragmentShader;
+            usedVertexShader = vertexShader;
+
+            this.init();
+        }
+        if (key === '5') {
+
+            usedFragmentShader = fragmentShader1;
+            usedVertexShader = vertexShader1;
+
+            this.init();
+        }
         if (key === 'k') {
             this.setState({ isLoop: false });
             this.animateModels();
@@ -291,13 +315,14 @@ export default class EA9 extends Component {
                     </div>
 
                     <KeyboardEventHandler
-                        handleKeys={['w', 'a', 's', 'd', 'q', 'e', 'i', 'o', '1', '2', '3', 'k', 'l', 'p']}
+                        handleKeys={['w', 'a', 's', 'd', 'q', 'e', 'i', 'o', '1', '2', '3','4','5', 'k', 'l', 'p']}
                         onKeyEvent={(key, e) => this.handleKeyDown(key)} />
 
                     <div className='sliderBoxEA5'>
                         <div style={wrapperStyle}>
                             <h2>Note:</h2>
                             <p>Switch with 1, 2, 3 between ortho, frustum or perspective camera</p>
+                            <p>Switch with 4, 5 between image texture and procedural texture</p>
                             <h2>Controls:</h2>
                             <p>Start the Animated Loop with L or skip keyframe by keyframe with K. (Note: K will stop the loop.)</p>
                             <p>Move Camera with W,A,S,D on X and Y axis and with Q,E around Z. Zoom with I,O.</p>
@@ -317,17 +342,17 @@ export default class EA9 extends Component {
                         </div>
 
                         <div style={wrapperStyle}>
-                        <a href='https://a-gilles.com/wear_rm.php/'>Texture 1 Reference</a>
+                            <a href='https://a-gilles.com/wear_rm.php/'>Texture 1 Reference</a>
                         </div>
 
                         <div style={wrapperStyle}>
-                        <a href='https://i.pinimg.com/originals/c7/ef/80/c7ef8094f5014db6de1e6c3bf6c3d0ed.jpg'>Texture 2 Reference</a>
+                            <a href='https://i.pinimg.com/originals/c7/ef/80/c7ef8094f5014db6de1e6c3bf6c3d0ed.jpg'>Texture 2 Reference</a>
                         </div>
-                        
 
-                        <div><img src={myTestTexture}/></div>
-                        <div><img src={myGrassTexture}/></div>
-                        <div><img src={myRockTexture}/></div>
+
+                        <div><img src={myTestTexture} /></div>
+                        <div><img src={myGrassTexture} /></div>
+                        <div><img src={myRockTexture} /></div>
                     </div>
                 </div>
                 <div style={{ position: 'relative', height: '30px' }}></div>
@@ -354,7 +379,7 @@ export default class EA9 extends Component {
             this.initModels();
             this.initPipline();
 
-            this.setState({isLoop: false});
+            this.setState({ isLoop: true });
             //this.renderWegGL();
             this.myLoop();
 
@@ -383,23 +408,23 @@ export default class EA9 extends Component {
      * be in render .
      */
     initPipline = () => {
-        gl.clearColor(.95, .95, .95, 1);
- 
+        gl.clearColor(.1, .1, .1, 1);
+
         // Backface culling.
         gl.frontFace(gl.CCW);
         gl.enable(gl.CULL_FACE);
         gl.cullFace(gl.BACK);
- 
+
         // Depth(Z)-Buffer.
         gl.enable(gl.DEPTH_TEST);
- 
+
         // Polygon offset of rastered Fragments.
         gl.enable(gl.POLYGON_OFFSET_FILL);
         gl.polygonOffset(0.5, 0);
- 
+
         // Set viewport.
         gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
- 
+
         // Init camera.
         // Set projection aspect ratio.
         camera.aspect = gl.viewportWidth / gl.viewportHeight;
@@ -431,10 +456,10 @@ export default class EA9 extends Component {
         var shaderSource;
 
         if (SourceTagId == 'vertexshader') {
-            shaderSource = vertexShaderText;
+            shaderSource = usedVertexShader;
         }
         else {
-            shaderSource = fragmentShaderText;
+            shaderSource = usedFragmentShader;
         }
 
         gl.shaderSource(shader, shaderSource);
@@ -447,47 +472,50 @@ export default class EA9 extends Component {
     }
 
     initUniforms = () => {
-         // Projection Matrix.
-         prog.pMatrixUniform = gl.getUniformLocation(prog, "uPMatrix");
- 
-         // Model-View-Matrix.
-         prog.mvMatrixUniform = gl.getUniformLocation(prog, "uMVMatrix");
-  
-         // Normal Matrix.
-         prog.nMatrixUniform = gl.getUniformLocation(prog, "uNMatrix");
-  
-         // Color.
-         prog.colorUniform = gl.getUniformLocation(prog, "uColor");
-  
-         // Light.
-         prog.ambientLightUniform = gl.getUniformLocation(prog,
-                 "ambientLight");
-         // Array for light sources uniforms.
-         prog.lightUniform = [];
-         // Loop over light sources.
-         for (var j = 0; j < illumination.light.length; j++) {
-             var lightNb = "light[" + j + "]";
-             // Store one object for every light source.
-             var l = {};
-             l.isOn = gl.getUniformLocation(prog, lightNb + ".isOn");
-             l.position = gl.getUniformLocation(prog, lightNb + ".position");
-             l.color = gl.getUniformLocation(prog, lightNb + ".color");
-             prog.lightUniform[j] = l;
-         }
-  
-         // Material.
-         prog.materialKaUniform = gl.getUniformLocation(prog, "material.ka");
-         prog.materialKdUniform = gl.getUniformLocation(prog, "material.kd");
-         prog.materialKsUniform = gl.getUniformLocation(prog, "material.ks");
-         prog.materialKeUniform = gl.getUniformLocation(prog, "material.ke");
+        // Projection Matrix.
+        prog.pMatrixUniform = gl.getUniformLocation(prog, "uPMatrix");
 
-         // Texture.
+        // Model-View-Matrix.
+        prog.mvMatrixUniform = gl.getUniformLocation(prog, "uMVMatrix");
+
+        // Normal Matrix.
+        prog.nMatrixUniform = gl.getUniformLocation(prog, "uNMatrix");
+
+        // Color.
+        prog.colorUniform = gl.getUniformLocation(prog, "uColor");
+
+        // Light.
+        prog.ambientLightUniform = gl.getUniformLocation(prog,
+            "ambientLight");
+        // Array for light sources uniforms.
+        prog.lightUniform = [];
+        // Loop over light sources.
+        for (var j = 0; j < illumination.light.length; j++) {
+            var lightNb = "light[" + j + "]";
+            // Store one object for every light source.
+            var l = {};
+            l.isOn = gl.getUniformLocation(prog, lightNb + ".isOn");
+            l.position = gl.getUniformLocation(prog, lightNb + ".position");
+            l.color = gl.getUniformLocation(prog, lightNb + ".color");
+            prog.lightUniform[j] = l;
+        }
+
+        // Material.
+        prog.materialKaUniform = gl.getUniformLocation(prog, "material.ka");
+        prog.materialKdUniform = gl.getUniformLocation(prog, "material.kd");
+        prog.materialKsUniform = gl.getUniformLocation(prog, "material.ks");
+        prog.materialKeUniform = gl.getUniformLocation(prog, "material.ke");
+
+        // Texture.
         prog.textureUniform = gl.getUniformLocation(prog, "uTexture");
-     }
 
-      /**
-     * Load the texture image file.
-     */
+        // Time
+        prog.timeUniform = gl.getUniformLocation(prog, "uTime");
+    }
+
+    /**
+   * Load the texture image file.
+   */
     initTexture = (model, textureFileReference) => {
         var texture = gl.createTexture();
         model.texture = texture;
@@ -500,27 +528,27 @@ export default class EA9 extends Component {
     }
 
     onloadTextureImage = (texture) => {
- 
+
         texture.loaded = true;
- 
+
         // Use texture object.
         gl.bindTexture(gl.TEXTURE_2D, texture);
- 
+
         // Assigen image data.
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE,
-                texture.image);
- 
+            texture.image);
+
         // Set texture parameter.
         // Min Filter: NEAREST,LINEAR, .. , LINEAR_MIPMAP_LINEAR,
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
         // Mag Filter: NEAREST,LINEAR
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
         // Use mip-Mapping.
         gl.generateMipmap(gl.TEXTURE_2D);
- 
+
         // Release texture object.
         gl.bindTexture(gl.TEXTURE_2D, null);
- 
+
         // Update the scene.
         this.renderWegGL();
     }
@@ -533,51 +561,53 @@ export default class EA9 extends Component {
         material = material || {};
         // Set some default values,
         // if not defined in material paramter.
-        material.ka = material.ka || [ 0.3, 0.3, 0.3 ];
-        material.kd = material.kd || [ 0.6, 0.6, 0.6 ];
-        material.ks = material.ks || [ 0.8, 0.8, 0.8 ];
+        material.ka = material.ka || [0.3, 0.3, 0.3];
+        material.kd = material.kd || [0.6, 0.6, 0.6];
+        material.ks = material.ks || [0.8, 0.8, 0.8];
         material.ke = material.ke || 10.;
- 
+
         return material;
     }
 
     initModels = () => {
 
+        models = [];
+
         // Create some default material.
         var mDefault = this.createPhongMaterial();
 
-        var mRed = this.createPhongMaterial({kd:[1.,0.,0.]});
-        var mGreen = this.createPhongMaterial({kd:[0.,1.,0.]});
-        var mBlue = this.createPhongMaterial({kd:[0.,0.,1.]});
-        var mWhite = this.createPhongMaterial({ka:[1.,1.,1.], kd:[.5,.5,.5],ks:[0.,0.,0.]});
+        var mRed = this.createPhongMaterial({ kd: [1., 0., 0.] });
+        var mGreen = this.createPhongMaterial({ kd: [0., 1., 0.] });
+        var mBlue = this.createPhongMaterial({ kd: [0., 0., 1.] });
+        var mWhite = this.createPhongMaterial({ ka: [1., 1., 1.], kd: [.5, .5, .5], ks: [0., 0., 0.] });
 
-        this.createModel('plane', plane, fill, [1, 1, 1, 1], [0, -3.8, 0], [0, 0, 0,0],[2, 2, 2,2], mDefault,'grasstex.jpg');
-        this.createModel('torus', torus, fill, [1, 1, 1, 1], [0, 0, 0], [1.535, 0, 0,0], [4, 4, 4,4], mRed,'rocktex.jpg');
+        this.createModel('plane', plane, fill, [1, 1, 1, 1], [0, -3.8, 0], [0, 0, 0, 0], [2, 2, 2, 2], mDefault, 'grasstex.jpg');
+        this.createModel('torus', torus, fill, [1, 1, 1, 1], [0, 0, 0], [1.535, 0, 0, 0], [4, 4, 4, 4], mRed, 'rocktex.jpg');
+
+        /*
+                this.createModel('sphere', sphere, fill, [1, 1, 1, 1], [.2, -.2, 0], [0, 0, 0,0],[.1, .1, .1, .1], mGreen,'x.png');
+                this.createModel('sphere', sphere, fill, [1, 1, 1, 1], [-.2, .2, 0], [0, 0, 0,0],[.1, .1, .1, .1], mBlue,'x.png');
+                this.createModel('sphere', sphere, fill, [1, 1, 1, 1], [-.2, -.2, 0], [0, 0, 0,0],[.1, .1, .1, .1], mWhite,'x.png');
+                this.createModel('sphere', sphere, fill, [1, 1, 1, 1], [.2, .2, 0], [0, 0, 0,0],[.1, .1, .1, .1], mBlue,'x.png');
         
-/*
-        this.createModel('sphere', sphere, fill, [1, 1, 1, 1], [.2, -.2, 0], [0, 0, 0,0],[.1, .1, .1, .1], mGreen,'x.png');
-        this.createModel('sphere', sphere, fill, [1, 1, 1, 1], [-.2, .2, 0], [0, 0, 0,0],[.1, .1, .1, .1], mBlue,'x.png');
-        this.createModel('sphere', sphere, fill, [1, 1, 1, 1], [-.2, -.2, 0], [0, 0, 0,0],[.1, .1, .1, .1], mWhite,'x.png');
-        this.createModel('sphere', sphere, fill, [1, 1, 1, 1], [.2, .2, 0], [0, 0, 0,0],[.1, .1, .1, .1], mBlue,'x.png');
-
-        //light1 position marker
-        this.createModel('sphere', sphere, wf, [1, 0, 0, 1], lightPosition1, [0, 0, 0,0],[.5, .5, .5, .5], mDefault,'x.png');
-
-        //light1 position marker
-        this.createModel('sphere', sphere, wf, [1, 0, 0, 1], lightPosition2, [0, 0, 0,0],[.5, .5, .5, .5], mDefault,'x.png');*/
+                //light1 position marker
+                this.createModel('sphere', sphere, wf, [1, 0, 0, 1], lightPosition1, [0, 0, 0,0],[.5, .5, .5, .5], mDefault,'x.png');
+        
+                //light1 position marker
+                this.createModel('sphere', sphere, wf, [1, 0, 0, 1], lightPosition2, [0, 0, 0,0],[.5, .5, .5, .5], mDefault,'x.png');*/
 
         // Select one model that can be manipulated interactively by user.
         this.setState({ interactivePlane: models[0] });
-        
-        
+
+
         this.setState({ interactiveTorus: models[1] });
-/*
-        this.setState({ interactiveSphere1: models[2] });
-        this.setState({ interactiveSphere2: models[3] });
-        this.setState({ interactiveSphere3: models[4] });
-        this.setState({ interactiveSphere4: models[5] });
-        this.setState({ lightPosition1Marker: models[6] });
-        this.setState({ lightPosition2Marker: models[7] });*/
+        /*
+                this.setState({ interactiveSphere1: models[2] });
+                this.setState({ interactiveSphere2: models[3] });
+                this.setState({ interactiveSphere3: models[4] });
+                this.setState({ interactiveSphere4: models[5] });
+                this.setState({ lightPosition1Marker: models[6] });
+                this.setState({ lightPosition2Marker: models[7] });*/
     }
 
     /**
@@ -587,7 +617,7 @@ export default class EA9 extends Component {
      * @parameter fillstyle: wireframe, fill, fillwireframe.
      */
 
-    createModel = (geometryname, geometry, fillstyle, color, translate, rotate, scale, material,textureFileReference) => {
+    createModel = (geometryname, geometry, fillstyle, color, translate, rotate, scale, material, textureFileReference) => {
         var model = {};
         model.name = geometryname;
         model.fillstyle = fillstyle;
@@ -640,7 +670,7 @@ export default class EA9 extends Component {
         // Bind vertex buffer to attribute variable.
         prog.positionAttrib = gl.getAttribLocation(prog, 'aPosition');
         gl.enableVertexAttribArray(prog.positionAttrib);
- 
+
         // Setup normal vertex buffer object.
         model.vboNormal = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, model.vboNormal);
@@ -648,29 +678,29 @@ export default class EA9 extends Component {
         // Bind buffer to attribute variable.
         prog.normalAttrib = gl.getAttribLocation(prog, 'aNormal');
         gl.enableVertexAttribArray(prog.normalAttrib);
- 
+
         // Setup texture coordinate vertex buffer object.
         model.vboTextureCoord = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, model.vboTextureCoord);
         gl.bufferData(gl.ARRAY_BUFFER, model.textureCoord, gl.STATIC_DRAW);
         // Bind buffer to attribute variable.
         prog.textureCoordAttrib = gl
-                .getAttribLocation(prog, 'aTextureCoord');
+            .getAttribLocation(prog, 'aTextureCoord');
         gl.enableVertexAttribArray(prog.textureCoordAttrib);
- 
+
         // Setup lines index buffer object.
         model.iboLines = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboLines);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.indicesLines,
-                gl.STATIC_DRAW);
+            gl.STATIC_DRAW);
         model.iboLines.numberOfElements = model.indicesLines.length;
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
- 
+
         // Setup triangle index buffer object.
         model.iboTris = gl.createBuffer();
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboTris);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, model.indicesTris,
-                gl.STATIC_DRAW);
+            gl.STATIC_DRAW);
         model.iboTris.numberOfElements = model.indicesTris.length;
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
     }
@@ -696,25 +726,23 @@ export default class EA9 extends Component {
         lightPosition1[2] += (xOffset * radiusExpension);
 
         if (this.state.angle > (6.499)) {
-        lightPosition2[0] -= (yOffset * radiusExpension);
-        lightPosition2[2] -= (xOffset * radiusExpension);
+            lightPosition2[0] -= (yOffset * radiusExpension);
+            lightPosition2[2] -= (xOffset * radiusExpension);
         }
 
-        if(this.state.lightPosition1Marker !==null)
-        {
-            this.state.lightPosition1Marker.translate = 
-            [this.state.lightPosition1Marker.translate[0] + (yOffset * radiusExpension),
-            this.state.lightPosition1Marker.translate[1],
-            this.state.lightPosition1Marker.translate[2] + (xOffset * radiusExpension)]
+        if (this.state.lightPosition1Marker !== null) {
+            this.state.lightPosition1Marker.translate =
+                [this.state.lightPosition1Marker.translate[0] + (yOffset * radiusExpension),
+                this.state.lightPosition1Marker.translate[1],
+                this.state.lightPosition1Marker.translate[2] + (xOffset * radiusExpension)]
         }
 
-        if(this.state.lightPosition2Marker !==null)
-        {
+        if (this.state.lightPosition2Marker !== null) {
             if (this.state.angle > (6.499)) {
-            this.state.lightPosition2Marker.translate = 
-            [this.state.lightPosition2Marker.translate[0] - (yOffset * radiusExpension),
-            this.state.lightPosition2Marker.translate[1],
-            this.state.lightPosition2Marker.translate[2] - (xOffset * radiusExpension)]
+                this.state.lightPosition2Marker.translate =
+                    [this.state.lightPosition2Marker.translate[0] - (yOffset * radiusExpension),
+                    this.state.lightPosition2Marker.translate[1],
+                    this.state.lightPosition2Marker.translate[2] - (xOffset * radiusExpension)]
             }
         }
 
@@ -785,8 +813,8 @@ export default class EA9 extends Component {
         }
 
 
-     // Clear framebuffer and depth-/z-buffer.
-     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        // Clear framebuffer and depth-/z-buffer.
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         this.setProjection();
 
@@ -822,14 +850,14 @@ export default class EA9 extends Component {
             }
             // Update modelview for model.
             this.updateTransformations(models[i]);
-            
+
             // Set uniforms for model.
             //
             // Transformation matrices.
             gl.uniformMatrix4fv(prog.mvMatrixUniform, false,
-                    models[i].mvMatrix);
+                models[i].mvMatrix);
             gl.uniformMatrix3fv(prog.nMatrixUniform, false,
-                    models[i].nMatrix);
+                models[i].nMatrix);
             // Color (not used with lights).
             gl.uniform4fv(prog.colorUniform, models[i].color);
             // Material.
@@ -841,7 +869,10 @@ export default class EA9 extends Component {
             gl.activeTexture(gl.TEXTURE0);
             gl.bindTexture(gl.TEXTURE_2D, models[i].texture);
             gl.uniform1i(prog.textureUniform, 0);
- 
+
+            //Time
+            gl.uniform1f(prog.timeUniform, this.state.angle);
+
             this.draw(models[i]);
         }
     }
@@ -851,11 +882,11 @@ export default class EA9 extends Component {
         // Use shortcut variables.
         var mMatrix = model.mMatrix;
         var mvMatrix = model.mvMatrix;
- 
+
         // Reset matrices to identity.
         glmatrix.mat4.identity(mMatrix);
         glmatrix.mat4.identity(mvMatrix);
- 
+
         // Translate.
         glmatrix.mat4.translate(mMatrix, mMatrix, model.translate);
         // Rotate.
@@ -864,11 +895,11 @@ export default class EA9 extends Component {
         glmatrix.mat4.rotateZ(mMatrix, mMatrix, model.rotate[2]);
         // Scale
         glmatrix.mat4.scale(mMatrix, mMatrix, model.scale);
- 
+
         // Combine view and model matrix
         // by matrix multiplication to mvMatrix.
         glmatrix.mat4.multiply(mvMatrix, camera.vMatrix, mMatrix);
- 
+
         // Calculate normal matrix from model matrix.
         glmatrix.mat3.normalFromMat4(model.nMatrix, mvMatrix);
     }
@@ -896,39 +927,39 @@ export default class EA9 extends Component {
 
         // Setup position VBO.
         gl.bindBuffer(gl.ARRAY_BUFFER, model.vboPos);
-        gl.vertexAttribPointer(prog.positionAttrib, 3, gl.FLOAT,false, 0, 0);
- 
+        gl.vertexAttribPointer(prog.positionAttrib, 3, gl.FLOAT, false, 0, 0);
+
         // Setup normal VBO.
         gl.bindBuffer(gl.ARRAY_BUFFER, model.vboNormal);
         gl.vertexAttribPointer(prog.normalAttrib, 3, gl.FLOAT, false, 0, 0);
- 
+
         // Setup texture VBO.
         gl.bindBuffer(gl.ARRAY_BUFFER, model.vboTextureCoord);
         gl.vertexAttribPointer(prog.textureCoordAttrib, 2, gl.FLOAT, false,
-                0, 0);
- 
+            0, 0);
+
         // Setup rendering tris.
         var fill = (model.fillstyle.search(/fill/) != -1);
         if (fill) {
             gl.enableVertexAttribArray(prog.normalAttrib);
             gl.enableVertexAttribArray(prog.textureCoordAttrib);
- 
+
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboTris);
             gl.drawElements(gl.TRIANGLES, model.iboTris.numberOfElements,
-                    gl.UNSIGNED_SHORT, 0);
+                gl.UNSIGNED_SHORT, 0);
         }
- 
+
         // Setup rendering lines.
         var wireframe = (model.fillstyle.search(/wireframe/) != -1);
         if (wireframe) {
-            gl.uniform4fv(prog.colorUniform, [ 0., 0., 0., 1. ]);
+            gl.uniform4fv(prog.colorUniform, [0., 0., 0., 1.]);
             gl.disableVertexAttribArray(prog.normalAttrib);
             gl.disableVertexAttribArray(prog.textureCoordAttrib);
- 
+
             gl.vertexAttrib3f(prog.normalAttrib, 0, 0, 0);
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, model.iboLines);
             gl.drawElements(gl.LINES, model.iboLines.numberOfElements,
-                    gl.UNSIGNED_SHORT, 0);
+                gl.UNSIGNED_SHORT, 0);
         }
     }
 }
