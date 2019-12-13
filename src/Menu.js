@@ -12,6 +12,7 @@ import EA6 from './EA6/index.js';
 import EA7 from './EA7/index.js';
 import EA8 from './EA8/index.js';
 import EA9 from './EA9/index.js';
+import EA10 from './EA10/index.js';
 
 class Menu extends Component {
   state = {
@@ -46,6 +47,8 @@ class Menu extends Component {
         return <EA8 />;
       case 10:
         return <EA9 />;
+      case 11:
+        return <EA10 />;
       default:
         return <Buttons clickBtn={this.clickBtn} />;
     }
