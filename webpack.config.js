@@ -18,11 +18,11 @@ module.exports = {
         rules: [
           {
             test: /\.csv$/,
-            loader: 'csv-loader',
+            loader: 'file-loader',
+            exclude: /node_modules/,
             options: {
-              dynamicTyping: true,
-              header: true,
-              skipEmptyLines: true
+              name: "[path][name].[ext]",
+              emitFile: true,
             }
           },
             {

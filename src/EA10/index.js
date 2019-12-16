@@ -12,8 +12,7 @@ import Papa from 'papaparse';
 
 import Dropzone from 'react-dropzone'
 
-
-import habermanCSVDataSet from './data/haberman.csv';
+import habermanCSVDataSet from '../../public/haberman.csv';
 
 import vertexShader from './vertexShader.glsl';
 import fragmentShader from './fragmentShader.glsl';
@@ -66,31 +65,51 @@ var prog;
 var models = [];
 
 var zoomStep = 1;
+var cameraTranslateStep = 2;
 
 var camera = {
     // Initial position of the camera.
-    eye: [0, 5, 0],
+    eye: glmatrix.vec3.fromValues(0,    0, 0),
     // Point to look at.
     center: [0, 0, 0],
-    // Roll and pitch of the camera.
-    up: [0, 1, 0],
     // Opening angle given in radian.
     // radian = degree*2*PI/360.
-    fovy: 140.0 * Math.PI / 180,
+    fovy: 60.0 * Math.PI / 180,
     // Camera near plane dimensions:
     // value for left right top bottom in projection.
-    lrtb: 100.0,
+    lrtb: 2.0,
     // View matrix.
     vMatrix: glmatrix.mat4.create(),
     // Projection matrix.
     pMatrix: glmatrix.mat4.create(),
     // Projection types: ortho, perspective, frustum.
-    projectionType: "perspective",
+    projectionType: "ortho",
     // Angle to Z-Axis for camera when orbiting the center
     // given in radian.
     zAngle: 0,
     // Distance in XZ-Plane from center when orbiting.
-    distance: 8,
+    distance: 4,
+    rotate: [0, 0, 0],
+    rotateX: function (angle) {
+        var M = glmatrix.mat4.create();
+        glmatrix.mat4.rotateX(M, M, angle);
+        glmatrix.mat4.multiply(this.vMatrix, M, this.vMatrix);
+    },
+    rotateY: function (angle) {
+        var M = glmatrix.mat4.create();
+        glmatrix.mat4.rotateY(M, M, angle);
+        glmatrix.mat4.multiply(this.vMatrix, M, this.vMatrix);
+    },
+    rotateZ: function (angle) {
+        var M = glmatrix.mat4.create();
+        glmatrix.mat4.rotateZ(M, M, angle);
+        glmatrix.mat4.multiply(this.vMatrix, M, this.vMatrix);
+    },
+    translate: function (vec) {
+        var M = glmatrix.mat4.create();
+        glmatrix.mat4.translate(M, M, vec);
+        glmatrix.mat4.multiply(this.vMatrix, M, this.vMatrix);
+    }
 };
 
 
@@ -105,13 +124,13 @@ export default class EA10 extends Component {
         super(props);
         this.state = { // state keys go here
             eventKey: " ",
-            zoom: 120,
+            zoom: 30,
             xMin: -3.0, xMax: 3.0, yMin: -3.0, yMax: 3.0,
             rotationX: 0,
             rotationY: 0,
             rotationZ: 0,
             cameraEyeX: 0,
-            cameraEyeY: 5,
+            cameraEyeY: 0,
             cameraEyeZ: 0,
             cameraCenterX: 0,
             cameraCenterY: 0,
@@ -181,81 +200,105 @@ export default class EA10 extends Component {
 
         this.setState({ commandNote: ((key + " pressed! ") + this.state.commandNote) });
 
-        if (key === 'w') {
+        if (key === 'x') {
+            camera.rotateX(cameraMoveStep);
 
-            camera.eye[1] += cameraMoveStep;
         }
         else
-            if (key === 's') {
-                camera.eye[1] -= cameraMoveStep;
+            if (key === 'y') {
+                camera.rotateY(cameraMoveStep);
 
             }
             else
-                if (key === 'q') {
-
-                    camera.distance += cameraMoveStep;
+                if (key === 'z') {
+                    camera.rotateZ(cameraMoveStep);
 
                 }
                 else
-                    if (key === 'e') {
+                    if (key === 'w') {
 
-                        camera.distance -= cameraMoveStep;
-
+                        camera.translate([0, -cameraTranslateStep, 0]);
                     }
                     else
                         if (key === 'a') {
 
-                            camera.zAngle -= cameraMoveStep;
+                            camera.translate([cameraTranslateStep, 0, 0]);
 
 
                         }
                         else
-                            if (key === 'd') {
-
-                                camera.zAngle += cameraMoveStep;
+                            if (key === 's') {
+                                camera.translate([0, cameraTranslateStep, 0]);
 
                             }
                             else
-                                if (key === 'o') {
-                                    var value = this.state.zoom + zoomStep;
+                                if (key === 'd') {
 
-                                    this.setState
-                                        (
-                                            {
-                                                zoom: value
-                                            }
-                                        )
+                                    camera.translate([-cameraTranslateStep, 0, 0]);
+
                                 }
                                 else
-                                    if (key === 'i') {
+                                if (key === '8') {
 
-                                        var value = this.state.zoom - zoomStep;
+                                    camera.translate([0, 0, cameraTranslateStep]);
 
-                                        this.setState
-                                            (
-                                                {
-                                                    zoom: value
+                                }
+                                if (key === '9') {
+
+                                    camera.translate([0, 0, -cameraTranslateStep]);
+
+                                }
+                                    else
+                                        if (key === 'q') {
+
+                                            camera.distance += cameraMoveStep;
+
+                                        }
+                                        else
+                                            if (key === 'e') {
+
+                                                camera.distance -= cameraMoveStep;
+
+                                            }
+
+
+                                            else
+                                                if (key === 'o') {
+                                                    var value = this.state.zoom + zoomStep;
+
+                                                    this.setState
+                                                        (
+                                                            {
+                                                                zoom: value
+                                                            }
+                                                        )
                                                 }
-                                            )
-                                    }
+                                                else
+                                                    if (key === 'i') {
+
+                                                        var value = this.state.zoom - zoomStep;
+
+                                                        this.setState
+                                                            (
+                                                                {
+                                                                    zoom: value
+                                                                }
+                                                            )
+                                                    }
         if (key === '1') {
             zoomStep = 0.1;
-            camera.up = [0, 1, 0];
-            this.setState({ zoom: 6 });
+            this.setState({ zoom: 30 });
             camera.projectionType = 'ortho';
         }
         if (key === '2') {
             zoomStep = 0.1;
-            camera.up = [0, 1, 0];
-            this.setState({ zoom: 6 });
+            this.setState({ zoom: 50 });
             camera.projectionType = 'frustum';
         }
         if (key === '3') {
-            zoomStep = 0.1;
-            camera.lrtb = 11;
-            camera.fovy = 120.0 * Math.PI / 180;
-            camera.up = [0, 1, 0];
-            this.setState({ zoom: 120 });
+            zoomStep = 2.0;
+
+            this.setState({ zoom: 80 });
             camera.projectionType = 'perspective';
         }
         if (key === '4') {
@@ -310,13 +353,13 @@ export default class EA10 extends Component {
                     </div>
 
                     <KeyboardEventHandler
-                        handleKeys={['w', 'a', 's', 'd', 'q', 'e', 'i', 'o', '1', '2', '3', '4', '5', 'k', 'l', 'p']}
+                        handleKeys={['all','shift + space']}
                         onKeyEvent={(key, e) => this.handleKeyDown(key)} />
 
                     <div className='sliderBoxEA5'>
                         <div style={wrapperStyle}>
                             <h2>Note:</h2>
-                            <h3>Switch with 4, 5 between image texture and procedural texture</h3>
+                            <h3>Switch with 8, 9 to move perspective camera forward or backward on z axis</h3>
                             <p>Switch with 1, 2, 3 between ortho, frustum or perspective camera</p>
 
                             <h2>Controls:</h2>
@@ -342,9 +385,11 @@ export default class EA10 extends Component {
                                 </section>
                             )}
                         </Dropzone>
+
+                        <div style={wrapperStyle}>
+                            last commands : <p>{this.state.commandNote}</p>
+                        </div>
                     </div>
-
-
 
                 </div>
                 <div style={{ position: 'relative', height: '30px' }}></div>
@@ -464,6 +509,14 @@ export default class EA10 extends Component {
 
             this.setState({ isLoop: false });
             //this.renderWegGL();
+
+            /*
+            fetch('https://api.mydomain.com')
+            .then(response => response.json())
+            .then(data => this.parseCSV(data));
+
+            this.parseCSV((habermanCSVDataSet));*/
+
             this.myLoop();
 
 
@@ -654,7 +707,7 @@ export default class EA10 extends Component {
 
     initModels = () => {
 
-        models = [];
+        //models = [];
         var fs = "fillwireframe";
         var mBlue = this.createPhongMaterial({ kd: [0., 0., 1.] });
         this.createModel(sphere, fs, [1, 1, 1, 1], [0, 0, 0], [0, 0, 0],
@@ -768,6 +821,22 @@ export default class EA10 extends Component {
         camera.eye[z] += camera.distance * Math.cos(camera.zAngle);
     }
 
+    calculateCamera = () => {
+
+        var vMatrix = camera.vMatrix;
+        glmatrix.mat4.identity(vMatrix);
+
+        // Rotate.
+        glmatrix.mat4.rotateX(vMatrix, vMatrix, camera.rotate[0]);
+        glmatrix.mat4.rotateY(vMatrix, vMatrix, camera.rotate[1]);
+        glmatrix.mat4.rotateZ(vMatrix, vMatrix, camera.rotate[2]);
+
+        // Translate.
+        var trans = glmatrix.vec3.clone(camera.eye);
+        glmatrix.vec3.scale(trans, trans, -1.0);
+        glmatrix.mat4.translate(vMatrix, vMatrix, trans);
+    }
+
 
     animateModels = () => {
 
@@ -856,25 +925,15 @@ export default class EA10 extends Component {
      */
     renderWegGL = () => {
 
-        if (camera.projectionType === 'frustum') {
-            camera.lrtb = this.state.zoom;
-        } else if (camera.projectionType === 'perspective') {
-            camera.lrtb = this.state.zoom;
-            camera.fovy = this.state.zoom * Math.PI / 180;
-        }
-        else {
-            camera.lrtb = this.state.zoom;
-        }
-
-
         // Clear framebuffer and depth-/z-buffer.
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         this.setProjection();
 
-        this.calculateCameraOrbit();
+        //this.calculateCameraOrbit();
+        //this.calculateCamera();
 
-        glmatrix.mat4.lookAt(camera.vMatrix, camera.eye, camera.center, camera.up);
+        //glmatrix.mat4.lookAt(camera.vMatrix, camera.eye, camera.center, camera.up);
 
         // Set light uniforms.
         gl.uniform3fv(prog.ambientLightUniform, illumination.ambientLight);
@@ -962,15 +1021,20 @@ export default class EA10 extends Component {
         // Set projection Matrix.
         switch (camera.projectionType) {
             case ("ortho"):
+                camera.lrtb = this.state.zoom;
                 var v = camera.lrtb;
                 glmatrix.mat4.ortho(camera.pMatrix, -v, v, -v, v, -20, 20);
                 break;
             case ("frustum"):
+                camera.lrtb = this.state.zoom;
                 var v = camera.lrtb;
-                glmatrix.mat4.frustum(camera.pMatrix, -v / 2, v / 2, -v / 2, v / 2, 1, 10);
+                glmatrix.mat4.frustum(camera.pMatrix, -v / 2, v / 2, -v / 2, v / 2, 1, camera.lrtb);
                 break;
             case ("perspective"):
-                glmatrix.mat4.perspective(camera.pMatrix, camera.fovy, camera.aspect, 1, 100);
+
+                camera.lrtb = this.state.zoom;
+                glmatrix.mat4.perspective(camera.pMatrix, camera.fovy, camera.aspect, 
+                    1, camera.lrtb);
                 break;
         }
         // Set projection uniform.
@@ -1027,6 +1091,60 @@ export default class EA10 extends Component {
 
 
     dataLoadedCallback = (data, stats) => {
+        console.log('dataResult: ' + data);
+        console.log('calculatedStats: ' + stats);
 
+        this.initModelsFromData(data, stats);
+        this.initCameraFromData(stats);
+        this.renderWegGL();
     }
+
+    initModelsFromData = (data, stats) => {
+
+        var mRed = this.createPhongMaterial({ kd: [1., 0., 0.] });
+        var mGreen = this.createPhongMaterial({ kd: [0., 1., 0.] });
+
+        // Clear models for new data.
+        models = [];
+        for (var i = 0; i < data.length; i++) {
+            var d = data[i];
+            
+            /*
+            if (d[3] === 1) {
+                continue;
+            }*/
+
+            if (d[1] < 60 || d[1] > 63) {
+                continue;
+            }
+
+            // Set color according to classification.
+            var material = mGreen;
+            if (d[3] === 2) {
+                material = mRed;
+            }
+            var pos = [d[0], d[1], d[2]];
+            // Scale model according to data range and data set size ..
+            var scale = stats.maxRange / 100;
+            var scale3f = [scale, scale, scale];
+            this.createModel(sphere, fill, [1, 1, 1, 1], pos, [0, 0, 0],
+                scale3f, material);
+        }
+    }
+
+    initCameraFromData = (stats) => {
+        camera.projectionType = "ortho";
+        camera.lrtb = stats.maxRange;
+        camera.distance = 0;
+        glmatrix.vec3.copy(camera.eye, stats.mean);
+
+        var vMatrix = camera.vMatrix;
+        glmatrix.mat4.identity(vMatrix);
+
+        // Translate.
+        var trans = glmatrix.vec3.clone(camera.eye);
+        glmatrix.vec3.scale(trans, trans, -1.0);
+        glmatrix.mat4.translate(vMatrix, vMatrix, trans);
+    }
+
 }
