@@ -1065,7 +1065,7 @@ export default class EA10 extends Component {
         var materials = [mRed, mGreen, mBlue, mYellow, mCyan, mMagenta];
 
         // Clear models for new data
-        //models = [];
+        models = [];
         for (var i = 0; i < data.length; i++) {
             var d = data[i];
             // Set color according to classification.
@@ -1125,7 +1125,7 @@ export default class EA10 extends Component {
         
         var opt = {};
         opt.epsilon = 10; // epsilon is learning rate (10 = default)
-        opt.perplexity = 30; // roughly how many neighbors each point influences (30 = default)
+        opt.perplexity = 50; // roughly how many neighbors each point influences (30 = default)
         opt.dim = 3; // dimensionality of the embedding (2 = default)
 
         tSNE = new tsnejs.tSNE(opt); // create a tSNE instance
