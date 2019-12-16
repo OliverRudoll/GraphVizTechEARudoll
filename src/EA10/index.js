@@ -8,14 +8,15 @@ import Slider from 'rc-slider';
 import Tooltip from 'rc-tooltip';
 import 'rc-slider/assets/index.css';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
-import Papa from 'papaparse';
-
+import * as Data from './DataHandler.js';
 import Dropzone from 'react-dropzone'
-
 import habermanCSVDataSet from '../../public/haberman.csv';
-
 import vertexShader from './vertexShader.glsl';
 import fragmentShader from './fragmentShader.glsl';
+import tsnejs from 'tsne';
+
+
+var tSNE;
 
 const Handle = Slider.Handle;
 
@@ -69,7 +70,7 @@ var cameraTranslateStep = 2;
 
 var camera = {
     // Initial position of the camera.
-    eye: glmatrix.vec3.fromValues(0,    0, 0),
+    eye: glmatrix.vec3.fromValues(0, 0, 0),
     // Point to look at.
     center: [0, 0, 0],
     // Opening angle given in radian.
@@ -115,6 +116,7 @@ var camera = {
 
 var cameraMoveStep = 0.1;
 
+
 export default class EA10 extends Component {
 
     static propTypes = {}
@@ -124,7 +126,7 @@ export default class EA10 extends Component {
         super(props);
         this.state = { // state keys go here
             eventKey: " ",
-            zoom: 30,
+            zoom: 2,
             xMin: -3.0, xMax: 3.0, yMin: -3.0, yMax: 3.0,
             rotationX: 0,
             rotationY: 0,
@@ -156,7 +158,12 @@ export default class EA10 extends Component {
             isLoop: false,
             radius: 0.2,
             commandNote: '',
-            drawOrbit: false
+            drawOrbit: false,
+            inverted: false,
+            perplexity: ' ',
+            iter: ' ',
+            dim: ' ',
+            epsilon: ' '
         }
     }
 
@@ -200,105 +207,106 @@ export default class EA10 extends Component {
 
         this.setState({ commandNote: ((key + " pressed! ") + this.state.commandNote) });
 
+        if (key === 'shift') {
+           this.setState({inverted: !this.state.inverted});
+        }
         if (key === 'x') {
-            camera.rotateX(cameraMoveStep);
+            if(this.state.inverted)
+            {
+                camera.rotateX(-cameraMoveStep);
+            }
+            else 
+            {
+                camera.rotateX(cameraMoveStep);
+            }
 
         }
-        else
-            if (key === 'y') {
-                camera.rotateY(cameraMoveStep);
-
+        if (key === 'y') {
+            if(this.state.inverted)
+            {
+                camera.rotateY(-cameraMoveStep);
             }
-            else
-                if (key === 'z') {
-                    camera.rotateZ(cameraMoveStep);
+            else 
+            {
+                camera.rotateY(cameraMoveStep);
+            }
 
-                }
-                else
-                    if (key === 'w') {
+        }
+        if (key === 'z') {
+            if(this.state.inverted)
+            {
+                camera.rotateZ(-cameraMoveStep);
+            }
+            else 
+            {
+                camera.rotateZ(cameraMoveStep);
+            }
 
-                        camera.translate([0, -cameraTranslateStep, 0]);
+        }
+        if (key === 'w') {
+
+            camera.translate([0, -cameraTranslateStep, 0]);
+        }
+        if (key === 'a') {
+
+            camera.translate([cameraTranslateStep, 0, 0]);
+        }
+        if (key === 's') {
+            camera.translate([0, cameraTranslateStep, 0]);
+        }
+        if (key === 'd') {
+
+            camera.translate([-cameraTranslateStep, 0, 0]);
+
+        }
+        if (key === 'q') {
+
+            camera.distance += cameraMoveStep;
+
+        }
+        if (key === 'e') {
+
+            camera.distance -= cameraMoveStep;
+
+        }
+        if (key === 'o') {
+            var value = this.state.zoom + zoomStep;
+            this.rescaleModels(zoomStep);
+
+            this.setState
+                (
+                    {
+                        zoom: value
                     }
-                    else
-                        if (key === 'a') {
+                )
+        }
+        if (key === 'i') {
 
-                            camera.translate([cameraTranslateStep, 0, 0]);
+            var value = this.state.zoom - zoomStep;
+            this.rescaleModels(-zoomStep);
 
-
-                        }
-                        else
-                            if (key === 's') {
-                                camera.translate([0, cameraTranslateStep, 0]);
-
-                            }
-                            else
-                                if (key === 'd') {
-
-                                    camera.translate([-cameraTranslateStep, 0, 0]);
-
-                                }
-                                else
-                                if (key === '8') {
-
-                                    camera.translate([0, 0, cameraTranslateStep]);
-
-                                }
-                                if (key === '9') {
-
-                                    camera.translate([0, 0, -cameraTranslateStep]);
-
-                                }
-                                    else
-                                        if (key === 'q') {
-
-                                            camera.distance += cameraMoveStep;
-
-                                        }
-                                        else
-                                            if (key === 'e') {
-
-                                                camera.distance -= cameraMoveStep;
-
-                                            }
-
-
-                                            else
-                                                if (key === 'o') {
-                                                    var value = this.state.zoom + zoomStep;
-
-                                                    this.setState
-                                                        (
-                                                            {
-                                                                zoom: value
-                                                            }
-                                                        )
-                                                }
-                                                else
-                                                    if (key === 'i') {
-
-                                                        var value = this.state.zoom - zoomStep;
-
-                                                        this.setState
-                                                            (
-                                                                {
-                                                                    zoom: value
-                                                                }
-                                                            )
-                                                    }
+            this.setState
+                (
+                    {
+                        zoom: value
+                    }
+                )
+        }
         if (key === '1') {
             zoomStep = 0.1;
-            this.setState({ zoom: 30 });
+            this.setState({ zoom: 2 });
             camera.projectionType = 'ortho';
         }
         if (key === '2') {
             zoomStep = 0.1;
-            this.setState({ zoom: 50 });
+            this.setState({ zoom: 2 });
             camera.projectionType = 'frustum';
         }
         if (key === '3') {
-            zoomStep = 2.0;
+            zoomStep = 1.0;
 
-            this.setState({ zoom: 80 });
+            //camera.translate([0, 0, -0.2]);
+            this.setState({ zoom: 30 });
             camera.projectionType = 'perspective';
         }
         if (key === '4') {
@@ -315,24 +323,37 @@ export default class EA10 extends Component {
 
             this.init();
         }
+        if (key === '8') {
+
+            camera.translate([0, 0, cameraTranslateStep]);
+
+        }
+        if (key === '9') {
+
+            camera.translate([0, 0, -cameraTranslateStep]);
+
+        }
         if (key === 'k') {
-            this.setState({ isLoop: false });
+            
+            Data.setData(tSNE.getSolution());
+            Data.downloadData();
+            /*this.setState({ isLoop: false });
             this.animateModels();
             var changedAngle = this.state.angle + this.state.deltaTime;
-            this.setState({ angle: changedAngle });
+            this.setState({ angle: changedAngle });*/
         }
-
         if (key === 'l') {
             this.setState({ isLoop: true });
             this.myLoop();
 
         }
-
         if (key === 'p') {
             var toggleDrawOrbit = !this.state.drawOrbit;
             this.setState({ drawOrbit: toggleDrawOrbit });
         }
-
+        if (key === 't') {
+            this.step_tSNE(1000);
+        }
         this.renderWegGL();
     }
 
@@ -350,10 +371,11 @@ export default class EA10 extends Component {
                 <div className='rowCEA5'>
                     <div className='canvasBoxEA5'>
                         <canvas ref={ref => this['webGLCanvas'] = ref} width='512px' height='512px'></canvas>
+        <p>epsilon: {this.state.epsilon} perplexity: {this.state.perplexity} dim: {this.state.dim} iter: {this.state.iter} </p>
                     </div>
 
                     <KeyboardEventHandler
-                        handleKeys={['all','shift + space']}
+                        handleKeys={['all', 'shift + space']}
                         onKeyEvent={(key, e) => this.handleKeyDown(key)} />
 
                     <div className='sliderBoxEA5'>
@@ -409,7 +431,7 @@ export default class EA10 extends Component {
                 console.log('file reading was succesful');
                 // Do whatever you want with the file contents
                 reader.onload = (e) => {
-                    this.parseCSV(e.target.result);
+                    Data.parse(e.target.result);
                 };
 
                 reader.readAsText(file);
@@ -417,77 +439,6 @@ export default class EA10 extends Component {
             reader.readAsArrayBuffer(file)
         })
     };
-
-
-    parseCSV = (textCSV) => {
-        //console.log(textCSV);
-        var results = Papa.parse(textCSV, { delimiter: ',', dynamicTyping: true, skipEmptyLines: true });
-
-        console.log(results.data);
-        console.log(results);
-
-        var textJSON = JSON.stringify(results.data);
-        console.log(textJSON);
-        var dataFromJSON = JSON.parse(textJSON);
-
-        var stats = this.calcStats(results.data);
-        this.dataLoadedCallback(results.data, stats);
-    }
-
-    /*
-     Get the minimum and maximum values for the first 3 ™data columns.
-     @return: object with field array of objects {min, max, range, mean} for each field
-     and separate arrays with {min, max, range, mean} with field as index
-     and value for maxRange
-*/
-    calcStats = (data) => {
-        if (!data) {
-            console.log("Data no valid.");
-            return undefined;
-        }
-        var stats = {};
-        stats.field = [];
-        stats.min = [];
-        stats.max = [];
-        stats.range = [];
-        stats.mean = [];
-
-        var min, max, mean, i;
-        // Assumes constant number of fields in data.
-        var nbFields = data[0].length;
-        for (i = 0; i < nbFields; i++) {
-            min = max = undefined;
-            mean = 0;
-            for (var d = 0; d < data.length; d++) {
-                mean += data[d][i];
-                if (max === undefined || (data[d][i] > max)) {
-                    max = data[d][i];
-                }
-                if (min === undefined || (data[d][i] < min)) {
-                    min = data[d][i];
-                }
-            }
-            mean /= data.length;
-            stats.field[i] = { min: min, max: max, range: max - min, mean: mean };
-            stats.min[i] = min;
-            stats.max[i] = max;
-            stats.range[i] = max - min;
-            stats.mean[i] = mean;
-        }
-
-        // Calculate maximum data range of all fields,
-        // restricted to the first 3 fields for 3D data plus extra fields.
-        stats.maxRange = 0;
-        //for (i = 0; i < nbFields; i++) {
-        for (i = 0; i < 3; i++) {
-            var range = Math.abs(stats.field[i].range);
-            if (range > stats.maxRange) {
-                stats.maxRange = range;
-            }
-        }
-
-        return stats;
-    }
 
     /*
     *
@@ -499,8 +450,10 @@ export default class EA10 extends Component {
 
     init = () => {
         try {
-            this.initWebGL();
 
+            Data.setAppContext(this);
+
+            this.initWebGL();
 
             this.initShaderProgram();
             this.initUniforms()
@@ -516,6 +469,8 @@ export default class EA10 extends Component {
             .then(data => this.parseCSV(data));
 
             this.parseCSV((habermanCSVDataSet));*/
+
+            //Data.generateData();
 
             this.myLoop();
 
@@ -706,14 +661,9 @@ export default class EA10 extends Component {
     }
 
     initModels = () => {
-
-        //models = [];
-        var fs = "fillwireframe";
-        var mBlue = this.createPhongMaterial({ kd: [0., 0., 1.] });
-        this.createModel(sphere, fs, [1, 1, 1, 1], [0, 0, 0], [0, 0, 0],
-            [2.5, 2.5, 2.5], mBlue);
-
-        this.setState({ interactiveSphere0: models[0] });
+        /*var fs = "fillwireframe";
+        var mBlue = this.createPhongMaterial({kd: [0., 0., 1.]});
+        this.createModel(sphere, fs, [1, 1, 1, 1], [0, 0, 0], [0, 0, 0], [.5, .5, .5], mBlue);*/
     }
 
     /**
@@ -1033,7 +983,7 @@ export default class EA10 extends Component {
             case ("perspective"):
 
                 camera.lrtb = this.state.zoom;
-                glmatrix.mat4.perspective(camera.pMatrix, camera.fovy, camera.aspect, 
+                glmatrix.mat4.perspective(camera.pMatrix, camera.fovy, camera.aspect,
                     1, camera.lrtb);
                 break;
         }
@@ -1089,46 +1039,50 @@ export default class EA10 extends Component {
         }
     }
 
-
-    dataLoadedCallback = (data, stats) => {
+    dataLoadedCallback = (data, labels, stats) => {
+ 
         console.log('dataResult: ' + data);
         console.log('calculatedStats: ' + stats);
 
-        this.initModelsFromData(data, stats);
+        this.initModelsFromData(data, labels, stats);
         this.initCameraFromData(stats);
         this.renderWegGL();
-    }
+      
+        this.init_tSNE(data);
+     }
 
-    initModelsFromData = (data, stats) => {
+    initModelsFromData = (data, labels, stats) => {
+        var fs = "fill";
 
-        var mRed = this.createPhongMaterial({ kd: [1., 0., 0.] });
-        var mGreen = this.createPhongMaterial({ kd: [0., 1., 0.] });
+        var mRed = this.createPhongMaterial({kd: [1., 0., 0.]});
+        var mGreen = this.createPhongMaterial({kd: [0., 1., 0.]});
+        var mBlue = this.createPhongMaterial({kd: [0., 0., 1.]});
+        var mYellow = this.createPhongMaterial({kd: [1., 1., 0.]});
+        var mCyan = this.createPhongMaterial({kd: [0., 1., 1.]});
+        var mMagenta = this.createPhongMaterial({kd: [1., 0., 1.]});
+        //var mWhite = this.createPhongMaterial({kd: [1., 1., 1.]});
 
-        // Clear models for new data.
-        models = [];
+        var materials = [mRed, mGreen, mBlue, mYellow, mCyan, mMagenta];
+
+        // Clear models for new data
+        //models = [];
         for (var i = 0; i < data.length; i++) {
             var d = data[i];
-            
-            /*
-            if (d[3] === 1) {
-                continue;
-            }*/
-
-            if (d[1] < 60 || d[1] > 63) {
-                continue;
-            }
-
             // Set color according to classification.
-            var material = mGreen;
-            if (d[3] === 2) {
-                material = mRed;
+            // NEW DIM
+            var pos = Array(3).fill(0);
+            //var pos = [d[0], d[1], d[2]];
+            // Set dimension of the projection.
+            var l = Math.min(d.length, 3);
+            for (var j = 0; j < l; j++) {
+                pos[j] = d[j];
             }
-            var pos = [d[0], d[1], d[2]];
-            // Scale model according to data range and data set size ..
+            // Scale model (like point size) according to data range and data set size.
             var scale = stats.maxRange / 100;
+            //var scale = stats.maxRange / 100 * camera.lrtb;
+            //var scale = Math.max(stats.maxRange / 100, camera.lrtb * 0.01);
             var scale3f = [scale, scale, scale];
-            this.createModel(sphere, fill, [1, 1, 1, 1], pos, [0, 0, 0],
-                scale3f, material);
+            this.createModel(sphere, fs, [1, 1, 1, 1], pos, [0, 0, 0], scale3f, materials[labels[i]]);
         }
     }
 
@@ -1146,5 +1100,74 @@ export default class EA10 extends Component {
         glmatrix.vec3.scale(trans, trans, -1.0);
         glmatrix.mat4.translate(vMatrix, vMatrix, trans);
     }
+
+    setModelTransformationFromData = (data) => {
+        for (var i = 0; i < data.length; i++) {
+            var d = data[i];
+            var pos = Array(3).fill(0);
+            var l = Math.min(d.length, 3);
+            for (var j = 0; j < l; j++) {
+                pos[j] = d[j];
+            }
+            models[i].translate = pos;
+        }
+    }
+
+    rescaleModels = (factor) => {
+        for (var i = 0; i < models.length; i++) {
+            models[i].scale[0] *= factor;
+            models[i].scale[1] *= factor;
+            models[i].scale[2] *= factor;
+        }
+    }
+
+    init_tSNE = (data) => {
+        
+        var opt = {};
+        opt.epsilon = 10; // epsilon is learning rate (10 = default)
+        opt.perplexity = 30; // roughly how many neighbors each point influences (30 = default)
+        opt.dim = 3; // dimensionality of the embedding (2 = default)
+
+        tSNE = new tsnejs.tSNE(opt); // create a tSNE instance
+
+        // Init from raw data (do not from a distance matrix, which is an other option).
+        // The data is stored within t-SNE. Thus the data object can be re-used.
+        tSNE.initDataRaw(data);
+
+        this.displayParameter_tSNE();
+        this.displayStepCounter_tSNE();
+    }
+
+    step_tSNE = (nbSteps) => {
+        nbSteps = (typeof nbSteps !== 'undefined') ? nbSteps : 1;
+
+        for (var k = 0; k < nbSteps; k++) {
+            tSNE.step();
+        }
+        var map = tSNE.getSolution();
+
+        this.setModelTransformationFromData(map);
+
+        // The Data gets centered by tSNE,
+        // thus we reset the camera translation to the origin.
+        if(tSNE.iter === 1) { glmatrix.mat4.identity(camera.vMatrix); }
+
+        this.displayStepCounter_tSNE();
+
+        Data.downloadData();
+    }
+
+    displayParameter_tSNE = () => {
+
+        this.setState({epsilon: tSNE.epsilon});
+        this.setState({perplexity: tSNE.perplexity});
+        this.setState({dim: tSNE.dim});
+     }
+      
+    displayStepCounter_tSNE = () => {
+
+       this.setState({iter: tSNE.iter});
+     }
+
 
 }
