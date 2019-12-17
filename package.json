@@ -50,7 +50,8 @@
     "webgl": "^0.0.7",
     "webpack": "^4.41.2",
     "webpack-cli": "^3.3.10",
-    "webpack-dev-server": "^3.9.0"
+    "webpack-dev-server": "^3.9.0",
+    "webpack-merge": "^4.2.2"
   },
   "browserify": {
     "transform": [
@@ -59,11 +60,11 @@
   },
   "scripts": {
     "predeploy": "yarn build",
-    "deploy": "gh-pages -d build",
+    "deploy": "gh-pages -d dist",
     "watch": "webpack --watch",
-    "start": "webpack-dev-server",
-    "dev": "webpack --mode development",
-    "build": "webpack --mode production"
+    "start": "webpack-dev-server --config ./webpack.dev.js",
+    "dev": "webpack --mode development --config ./webpack.dev.js",
+    "build": "webpack --mode production --config ./webpack.prod.js" 
   },
   "eslintConfig": {
     "extends": "react-app"

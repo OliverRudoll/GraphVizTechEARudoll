@@ -4,7 +4,7 @@ const InterpolateHtmlPlugin = require("interpolate-html-plugin");
 module.exports = {
     context: __dirname,
     entry: './src/index.js',
-    mode: 'development',
+    mode: 'production',
     output: {
     publicPath: '/',
     path: __dirname + '/',

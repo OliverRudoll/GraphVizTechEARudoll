@@ -10,7 +10,7 @@ import 'rc-slider/assets/index.css';
 import KeyboardEventHandler from 'react-keyboard-event-handler';
 import * as Data from './DataHandler.js';
 import Dropzone from 'react-dropzone'
-import habermanCSVDataSet from '../../public/haberman.csv';
+import DataSet from '../../public/data_0.csv';
 import vertexShader from './vertexShader.glsl';
 import fragmentShader from './fragmentShader.glsl';
 import tsnejs from 'tsne';
@@ -471,6 +471,8 @@ export default class EA10 extends Component {
             this.parseCSV((habermanCSVDataSet));*/
 
             //Data.generateData();
+
+            Data.parse(DataSet);
 
             this.myLoop();
 
