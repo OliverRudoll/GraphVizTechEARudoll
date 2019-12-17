@@ -6,8 +6,8 @@ module.exports = {
     entry: './src/index.js',
     mode: 'development',
     output: {
-    publicPath: '/dist/',
-    path: __dirname + '/dist/',
+    publicPath: '/dev/',
+    path: __dirname + '/dev/',
     filename: 'bundle.js'
     },
     devServer: {
@@ -17,12 +17,8 @@ module.exports = {
         rules: [
           {
             test: /\.csv$/,
-            loader: 'file-loader',
-            exclude: /node_modules/,
-            options: {
-              name: "[path][name].[ext]",
-              emitFile: true,
-            }
+            loader: 'raw-loader',
+            exclude: /node_modules/
           },
             {
                 test: /\.(jpg|jpeg|png|svg|gif|ico)$/,

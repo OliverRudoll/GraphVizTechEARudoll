@@ -6,13 +6,10 @@ module.exports = {
     entry: './src/index.js',
     mode: 'production',
     output: {
-    publicPath: '/',
-    path: __dirname + '/',
+    publicPath: '/GraphVizTechEARudoll/',
+    path: __dirname + '/dist/',
     filename: 'bundle.js'
     },
-    devServer: {
-        port: 3001
-        },
     module: {
         rules: [
           {
@@ -91,7 +88,9 @@ module.exports = {
   plugins: [
     new HtmlWebPackPlugin({
         template: __dirname + '/public/index.ejs',
-        filename: 'index.html'
+        filename: 'index.html',
+        favicon: "./public/favicon.ico",
+        showErrors: true
     }),
     new InterpolateHtmlPlugin({
           'PUBLIC_URL': 'Public'

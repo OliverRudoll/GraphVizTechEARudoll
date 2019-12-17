@@ -14,7 +14,7 @@ import DataSet from '../../public/data_0.csv';
 import vertexShader from './vertexShader.glsl';
 import fragmentShader from './fragmentShader.glsl';
 import tsnejs from 'tsne';
-
+import { DH_NOT_SUITABLE_GENERATOR } from 'constants';
 
 var tSNE;
 
@@ -420,26 +420,29 @@ export default class EA10 extends Component {
     }
 
     onDrop = (acceptedFiles) => {
-        acceptedFiles.forEach((file) => {
-
-            const reader = new FileReader()
-
-            reader.onabort = () => console.log('file reading was aborted')
-            reader.onerror = () => console.log('file reading has failed')
-            reader.onload = () => {
-
-                console.log('file reading was succesful');
-                // Do whatever you want with the file contents
-                reader.onload = (e) => {
-                    Data.parse(e.target.result);
-                };
-
-                reader.readAsText(file);
-            }
-            reader.readAsArrayBuffer(file)
-        })
+        acceptedFiles.forEach((file) => this.readFile(file))
     };
 
+
+
+    readFile = (file) => {
+
+        const reader = new FileReader()
+
+        reader.onabort = () => console.log('file reading was aborted')
+        reader.onerror = () => console.log('file reading has failed')
+        reader.onload = () => {
+
+            console.log('file reading was succesful');
+            // Do whatever you want with the file contents
+            reader.onload = (e) => {
+                Data.parse(e.target.result);
+            };
+
+            reader.readAsText(file);
+        }
+        reader.readAsArrayBuffer(file)
+    }
     /*
     *
     *
@@ -462,20 +465,14 @@ export default class EA10 extends Component {
 
             this.setState({ isLoop: false });
             //this.renderWegGL();
+            
+            console.log(window.location.href + 'public/data_0.csv');
 
-            /*
-            fetch('https://api.mydomain.com')
-            .then(response => response.json())
-            .then(data => this.parseCSV(data));
-
-            this.parseCSV((habermanCSVDataSet));*/
-
-            //Data.generateData();
-
-            Data.parse(DataSet);
+            fetch(window.location.href + 'public/data_0.csv')
+            .then(response => response.text())
+            .then(data => Data.parse(data));
 
             this.myLoop();
-
 
         } catch (e) {
             alert("Error: " + e);
